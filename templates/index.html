@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Malware Detection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
+        .content { padding: 40px; }
+        .section { 
+            margin-bottom: 40px; 
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section h2 { 
+            color: #2c3e50; 
+            margin-bottom: 20px; 
+            font-size: 1.5em;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            max-width: 100%;
+        }
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+        .feature-input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+        .feature-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .btn {
+            padding: 12px 25px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+        }
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #ecf0f1;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            background: #d5dbdb;
+            border-color: #2980b9;
+        }
+        .file-input {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            background: white;
+        }
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background: #e74c3c;
+            color: white;
+            border-left: 4px solid #c0392b;
+        }
+        .feature-label {
+            font-size: 0.75em;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 5px;
+        }
+        .icon { margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Malware Detection System</h1>
+            <p>Advanced AI-powered malware classification</p>
+        </div>
+        
+        <div class="content">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert">⚠️ {{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="section">
+                <h2>🔍 Manual Feature Analysis</h2>
+                <p style="margin-bottom: 20px; color: #7f8c8d;">Enter the 27 feature values for malware detection analysis:</p>
+                
+                <form method="POST" action="/predict">
+                    <div class="feature-grid">
+                        {% for i in range(27) %}
+                            <div>
+                                <div class="feature-label">{{ feature_names[i] }}</div>
+                                <input type="number" step="any" name="feature_{{ i }}" 
+                                       value="{{ demo_data[i] }}" required class="feature-input">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="icon">🔬</span>Analyze Sample
+                        </button>
+                        <button type="button" onclick="loadDemo()" class="btn btn-secondary">
+                            <span class="icon">📋</span>Load Demo Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="section">
+                <h2>📁 Batch File Analysis</h2>
+                <div class="upload-area">
+                    <form method="POST" action="/upload" enctype="multipart/form-data">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📤</div>
+                        <h3 style="margin-bottom: 15px; color: #2c3e50;">Upload CSV File</h3>
+                        <input type="file" name="file" accept=".csv" required class="file-input">
+                        <br>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="icon">⚡</span>Process File
+                        </button>
+                    </form>
+                    <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                        📝 Upload a CSV with 27 feature columns. Include 'Label' column for evaluation metrics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function loadDemo() {
+            const demoData = {{ demo_data | tojson }};
+            for (let i = 0; i < 27; i++) {
+                document.querySelector(`input[name="feature_${i}"]`).value = demoData[i];
+            }
+            
+            // Add visual feedback
+            const inputs = document.querySelectorAll('.feature-input');
+            inputs.forEach(input => {
+                input.style.borderColor = '#27ae60';
+                setTimeout(() => {
+                    input.style.borderColor = '#e0e0e0';
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+</html>
