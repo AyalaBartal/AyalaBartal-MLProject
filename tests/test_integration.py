@@ -5,15 +5,18 @@ import pytest
 import json
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app import app
+# Add the project root to Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+# Import the Flask app from app.py (not app/__init__.py)
+import app as app_module
 
 @pytest.fixture
 def client():
     """Create test client"""
-    app.config['TESTING'] = True
-    with app.test_client() as client:
+    app_module.app.config['TESTING'] = True
+    with app_module.app.test_client() as client:
         yield client
 
 def test_health_endpoint(client):
