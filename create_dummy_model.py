@@ -10,6 +10,9 @@ from src.model_wrapper import MalwareDetector
 
 def create_dummy_model():
     """Create and save dummy model for development"""
+    # Create models directory if it doesn't exist
+    os.makedirs('models', exist_ok=True)
+    
     detector = MalwareDetector()
     
     # Save model and scaler
