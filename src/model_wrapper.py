@@ -66,7 +66,7 @@ class MalwareDetector:
                 }
             })
         return results
-    
+
     def save(self, model_path, scaler_path):
         """Save model and scaler"""
         joblib.dump(self.model, model_path)

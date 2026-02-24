@@ -42,7 +42,3 @@ python app.py
 - [ ] Testing framework
 - [ ] CI/CD pipeline
 - [ ] Deployment
-
-## Contributors
-- [Your Name]
-- [ML Team Member]
