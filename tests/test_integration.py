@@ -34,7 +34,7 @@ def test_home_page(client):
 
 def test_api_predict_endpoint(client):
     """Test API prediction endpoint"""
-    test_features = [0.5] * 27
+    test_features = [0.0] * 473  # Updated to match model's expected features
     response = client.post('/api/predict',
                           data=json.dumps({'features': test_features}),
                           content_type='application/json')

@@ -26,12 +26,12 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Load real model with transformer
 detector = MalwareDetector(
-    'data/specific/dt/train/output/dt_report/decision_tree_model.joblib',
-    transformer_path='data/specific/dt/train/output/dt_report/decision_tree_transformer.joblib'
+    'models/decision_tree/decision_tree_model.joblib',
+    transformer_path='models/decision_tree/decision_tree_transformer.joblib'
 )
 
 # Load feature names from schema
-with open('data/specific/dt/train/output/dt_report/dt_feature_schema.json', 'r') as f:
+with open('models/decision_tree/dt_feature_schema.json', 'r') as f:
     schema = json.load(f)
     FEATURE_NAMES = schema['feature_order']
 
@@ -333,7 +333,7 @@ def api_predict():
 def dt_visualization():
     """Serve decision tree visualization image"""
     from flask import send_file
-    return send_file('data/specific/dt/train/output/dt_report/decision_tree_model.jpg', mimetype='image/jpeg')
+    return send_file('models/decision_tree/decision_tree_model.jpg', mimetype='image/jpeg')
 
 if __name__ == '__main__':
     app.run(debug=True)

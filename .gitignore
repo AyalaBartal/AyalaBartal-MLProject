@@ -124,7 +124,6 @@ dmypy.json
 
 # ML/Data Science specific
 *.pkl
-*.joblib
 *.h5
 *.hdf5
 *.model
@@ -132,11 +131,9 @@ dmypy.json
 *.pt
 *.pth
 *.onnx
-data/
 datasets/
 *.csv
 *.tsv
-*.json
 *.parquet
 *.feather
 wandb/
@@ -145,6 +142,11 @@ mlruns/
 tensorboard_logs/
 checkpoints/
 saved_models/
+
+# Allow specific model files needed for deployment
+!data/specific/dt/train/output/dt_report/*.joblib
+!data/specific/dt/train/output/dt_report/*.json
+!data/specific/dt/train/output/dt_report/*.jpg
 
 # IDE
 .vscode/
@@ -163,9 +165,10 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-models/*.pkl
-models/*.joblib
-models/*.h5
 uploads/
 temp/
 logs/
+data/
+
+# Allow models directory for deployment
+!models/
