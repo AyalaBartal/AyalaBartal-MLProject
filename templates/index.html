@@ -134,6 +134,40 @@
             padding: 0 5px;
         }
         .icon { margin-right: 8px; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 30px;
+            gap: 5px;
+        }
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            font-size: 1em;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        .tab:hover {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-bottom: 2px solid #3498db;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -152,67 +186,108 @@
                 {% endif %}
             {% endwith %}
             
-            <div class="section">
-                <h2>🔍 Manual Feature Analysis</h2>
-                <p style="margin-bottom: 20px; color: #7f8c8d;">Enter the 27 feature values for malware detection analysis:</p>
-                
-                <form method="POST" action="/predict">
-                    <div class="feature-grid">
-                        {% for i in range(27) %}
-                            <div>
-                                <div class="feature-label">{{ feature_names[i] }}</div>
-                                <input type="number" step="any" name="feature_{{ i }}" 
-                                       value="{{ demo_data[i] }}" required class="feature-input">
-                            </div>
-                        {% endfor %}
-                    </div>
-                    
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button type="submit" class="btn btn-primary">
-                            <span class="icon">🔬</span>Analyze Sample
-                        </button>
-                        <button type="button" onclick="loadDemo()" class="btn btn-secondary">
-                            <span class="icon">📋</span>Load Demo Data
-                        </button>
-                    </div>
-                </form>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('dt')">🌳 Decision Tree</button>
+                <button class="tab" onclick="switchTab('future')">➕ More Models (Coming Soon)</button>
             </div>
             
-            <div class="section">
-                <h2>📁 Batch File Analysis</h2>
-                <div class="upload-area">
-                    <form method="POST" action="/upload" enctype="multipart/form-data">
-                        <div style="font-size: 3em; margin-bottom: 15px;">📤</div>
-                        <h3 style="margin-bottom: 15px; color: #2c3e50;">Upload CSV File</h3>
-                        <input type="file" name="file" accept=".csv" required class="file-input">
-                        <br>
-                        <button type="submit" class="btn btn-primary">
-                            <span class="icon">⚡</span>Process File
-                        </button>
+            <div id="dt-tab" class="tab-content active">
+                <div class="section">
+                    <h2>📊 Model Visualization</h2>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Decision tree structure (click to view full size):</p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="/model/dt/visualization" target="_blank">
+                            <img src="/model/dt/visualization" alt="Decision Tree Visualization" 
+                                 style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer;">
+                        </a>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;">
+                            🔍 Click image to open in new tab for detailed view
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📄 Single Sample Analysis</h2>
+                    <p style="margin-bottom: 20px; color: #7f8c8d;">Enter raw PE file features ({{ raw_fields|length }} fields) - pre-filled with demo data:</p>
+                    
+                    <form method="POST" action="/predict_raw">
+                        <div class="feature-grid">
+                            {% for field in raw_fields %}
+                                <div>
+                                    <div class="feature-label">{{ field }}</div>
+                                    <input type="text" name="{{ field }}" value="{{ raw_demo_data.get(field, '') }}" class="feature-input">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">🔬</span>Analyze Sample
+                            </button>
+                        </div>
                     </form>
-                    <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
-                        📝 Upload a CSV with 27 feature columns. Include 'Label' column for evaluation metrics.
+                </div>
+                
+                <div class="section">
+                    <h2>📁 Batch File Analysis</h2>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">
+                        Upload a CSV file with either:
+                    </p>
+                    <ul style="margin-bottom: 15px; color: #7f8c8d; margin-left: 20px;">
+                        <li><strong>Raw PE data:</strong> {{ raw_fields|length }} fields (Size, Entropy, ImportedDlls, etc.)</li>
+                        <li><strong>Preprocessed data:</strong> {{ feature_names|length }} features</li>
+                    </ul>
+                    <p style="margin-bottom: 15px; color: #27ae60; font-size: 0.9em;">
+                        ✓ Raw files will be automatically preprocessed
+                    </p>
+                    <div class="upload-area">
+                        <form method="POST" action="/upload" enctype="multipart/form-data">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📤</div>
+                            <h3 style="margin-bottom: 15px; color: #2c3e50;">Upload CSV File</h3>
+                            <input type="file" name="file" accept=".csv" required class="file-input">
+                            <br>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">⚡</span>Process File
+                            </button>
+                        </form>
+                        <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                            📝 Include 'Label' column (0=Goodware, 1=Malware) for evaluation metrics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="future-tab" class="tab-content">
+                <div class="section">
+                    <h2>🚀 Coming Soon</h2>
+                    <p style="color: #7f8c8d; text-align: center; padding: 40px;">
+                        Additional machine learning models will be available here in future updates.
                     </p>
                 </div>
             </div>
         </div>
     </div>
+                <h2>🚀 Coming Soon</h2>
+                <p style="color: #7f8c8d; text-align: center; padding: 40px;">
+                    Additional machine learning models will be available here in future updates.
+                </p>
+            </div>
+        </div>
+    </div>
     
     <script>
-        function loadDemo() {
-            const demoData = {{ demo_data | tojson }};
-            for (let i = 0; i < 27; i++) {
-                document.querySelector(`input[name="feature_${i}"]`).value = demoData[i];
-            }
-            
-            // Add visual feedback
-            const inputs = document.querySelectorAll('.feature-input');
-            inputs.forEach(input => {
-                input.style.borderColor = '#27ae60';
-                setTimeout(() => {
-                    input.style.borderColor = '#e0e0e0';
-                }, 1000);
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
             });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
         }
     </script>
 </body>

@@ -112,35 +112,8 @@
                 </p>
             </div>
             
-            <div class="probability-section">
-                <h3 style="margin-bottom: 20px; text-align: center;">📊 Confidence Levels</h3>
-                
-                <div style="margin: 15px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span><strong>🛡️ Goodware</strong></span>
-                        <span><strong>{{ "%.1f%%" | format(probability.goodware * 100) }}</strong></span>
-                    </div>
-                    <div class="prob-bar">
-                        <div class="prob-fill prob-goodware" style="width: {{ probability.goodware * 100 }}%;">
-                            {{ "%.1f%%" | format(probability.goodware * 100) }}
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span><strong>🦠 Malware</strong></span>
-                        <span><strong>{{ "%.1f%%" | format(probability.malware * 100) }}</strong></span>
-                    </div>
-                    <div class="prob-bar">
-                        <div class="prob-fill prob-malware" style="width: {{ probability.malware * 100 }}%;">
-                            {{ "%.1f%%" | format(probability.malware * 100) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
             
-            <div style="text-align: center;">
+            <div style="text-align: center; margin-top: 30px;">
                 <a href="/" class="btn">🔙 Analyze Another Sample</a>
             </div>
         </div>
