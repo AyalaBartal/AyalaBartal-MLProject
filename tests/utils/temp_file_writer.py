@@ -1,5 +1,8 @@
 import os
+import shutil
 import tempfile
+from pathlib import Path
+
 from tests.utils import CsvUtil
 
 class TempFileWriter:
@@ -25,3 +28,12 @@ class TempFileWriter:
             os.remove(file_path)
         except FileNotFoundError:
             pass
+
+    @staticmethod
+    def create_temp_dir() -> Path:
+        return Path(tempfile.mkdtemp())
+
+    @staticmethod
+    def delete_temp_dir(path: Path) -> None:
+        if path and path.exists():
+            shutil.rmtree(path, ignore_errors=True)
