@@ -53,7 +53,7 @@ class CsvIoValidate:
                 if index >= count_headers :
                     raise ValueError("Invalid header index: index {} vs count headers {}}".format(index, count_headers))
                 header = headers[index]
-                expected_header = headers[index]
+                expected_header = expected_headers[index]
                 if expected_header != header:
                     error = "Invalid header in index {} expected {} actual {}".format(index, expected_header, header)
                     raise ValueError(error)
