@@ -10,23 +10,24 @@ import re
 import numpy as np
 import pandas as pd
 
+
 class DtPeDataTransformer:
 
     def __init__(self, converter):
         self.converter = converter
 
     def transform(self, data, k_ident=100, k_dlls=100, k_apis=200, bit_count=16):
-        safe_num = self.converter._safe_num
-        clean_dll = self.converter._clean_dll
-        clean_api = self.converter._clean_api
-        dt_parts = self.converter._dt_parts
-        ratio = self.converter._ratio
-        parse_listish = self.converter._parse_listish
-        expand_bits = self.converter._expand_bits
-        topk = self.converter._topk
-        clean_ident = self.converter._clean_ident
-        parse_tds = self.converter._parse_tds
-        to_dt = self.converter._to_dt
+        safe_num = self.converter.safe_num
+        clean_dll = self.converter.clean_dll
+        clean_api = self.converter.clean_api
+        dt_parts = self.converter.dt_parts
+        ratio = self.converter.ratio
+        parse_listish = self.converter.parse_listish
+        expand_bits = self.converter.expand_bits
+        topk = self.converter.topk
+        clean_ident = self.converter.clean_ident
+        parse_tds = self.converter.parse_tds
+        to_dt = self.converter.to_dt
 
         parts = []
         parts.extend(self.calc_nums(data, safe_num))
@@ -43,17 +44,17 @@ class DtPeDataTransformer:
             parts.append(topk(data['ImportedSymbols'], lambda v: clean_api(parse_listish(v)), k_apis, 'api'))
 
         if 'FirstSeenDate' in data.columns:
-            dt = to_dt(data['FirstSeenDate']);
-            parts.append(dt_parts(dt, 'FirstSeen'));
+            dt = to_dt(data['FirstSeenDate'])
+            parts.append(dt_parts(dt, 'FirstSeen'))
             parts.append(dt.isna().astype(np.int8).rename('FirstSeen_missing').to_frame())
         if 'TimeDateStamp' in data.columns:
-            dt, an = parse_tds(data['TimeDateStamp']);
-            parts.append(dt_parts(dt, 'TDS'));
+            dt, an = parse_tds(data['TimeDateStamp'])
+            parts.append(dt_parts(dt, 'TDS'))
             parts.append(an.rename('timestamp_anomalous').to_frame())
 
         X = pd.concat(parts, axis=1) if parts else pd.DataFrame(index=data.index)
-        X = X.replace([np.inf, -np.inf], 0).fillna(0);
-        X.columns = [re.sub(r"[^0-9A-Za-z_]+", "_", str(c)) for c in X.columns];
+        X = X.replace([np.inf, -np.inf], 0).fillna(0)
+        X.columns = [re.sub(r"[^0-9A-Za-z_]+", "_", str(c)) for c in X.columns]
         return X
 
     def calc_characteristics(self, data, bit_count, expand_bits, safe_num):
@@ -102,7 +103,7 @@ class DtPeDataTransformer:
         if 'NumberOfSymbols' in data.columns:
             der['symbols_nonzero'] = ((data['NumberOfSymbols']) > 0).astype(np.int8)
         if 'SizeOfOptionalHeader' in data.columns:
-            so = safe_num(data['SizeOfOptionalHeader']);
+            so = safe_num(data['SizeOfOptionalHeader'])
             der['optional_header_expected'] = so.isin([224, 240]).astype(np.int8)
         if 'ImportedDlls' in data.columns:
             der['n_imported_dlls'] = data['ImportedDlls'].apply(lambda v: len(clean_dll(parse_listish(v))))

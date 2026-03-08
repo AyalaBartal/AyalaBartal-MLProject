@@ -2,10 +2,11 @@ import json, math, re
 import numpy as np
 import pandas as pd
 
+
 class DtPeDataConverter:
 
     @staticmethod
-    def _parse_listish(s):
+    def parse_listish(s):
         if s is None or (isinstance(s, float) and math.isnan(s)): return []
         t = str(s).strip()
         try:
@@ -15,7 +16,7 @@ class DtPeDataConverter:
         return [w for w in re.split(r"[\s,;|]+", t) if w]
 
     @staticmethod
-    def _clean_dll(ts):
+    def clean_dll(ts):
         out = []
         for t in ts:
             t = str(t).lower().strip().strip('"\'');
@@ -25,7 +26,7 @@ class DtPeDataConverter:
         return out
 
     @staticmethod
-    def _clean_api(ts):
+    def clean_api(ts):
         out = []
         for t in ts:
             t = str(t).lower().strip().strip('"\'');
@@ -35,22 +36,22 @@ class DtPeDataConverter:
         return out
 
     @staticmethod
-    def _clean_ident(v):
+    def clean_ident(v):
         if v is None or (isinstance(v, float) and math.isnan(v)): return []
         s = re.sub(r"[^a-z0-9_]+", " ", str(v).lower());
         return [w for w in s.split() if len(w) >= 2]
 
     @staticmethod
-    def _safe_num(s):
+    def safe_num(s):
         return pd.to_numeric(s, errors='coerce').fillna(0)
 
     @staticmethod
-    def _expand_bits2(series, n_bits, prefix):
+    def expand_bits2(series, n_bits, prefix):
         x = pd.to_numeric(series, errors='coerce').fillna(0).astype(np.uint64)
         return pd.DataFrame({f"{prefix}_b{i}": ((x >> i) & 1).astype(np.int8) for i in range(n_bits)}, index=series.index)
 
     @staticmethod
-    def _expand_bits(series, n_bits, prefix):
+    def expand_bits(series, n_bits, prefix):
         x = (
             pd.to_numeric(series, errors='coerce')
             .fillna(0)
@@ -64,11 +65,11 @@ class DtPeDataConverter:
         )
 
     @staticmethod
-    def _to_dt(s):
+    def to_dt(s):
         return pd.to_datetime(s, errors='coerce', utc=True)
 
     @staticmethod
-    def _parse_tds(c):
+    def parse_tds(c):
         rn = pd.to_numeric(c, errors='coerce');
         an = ((rn == 0) | (rn == 0xFFFFFFFF)).fillna(False).astype(np.int8)
         dt = pd.to_datetime(rn, unit='s', errors='coerce', utc=True);
@@ -77,7 +78,7 @@ class DtPeDataConverter:
         return dt, an
 
     @staticmethod
-    def _dt_parts(dt, p):
+    def dt_parts(dt, p):
         out = pd.DataFrame(index=dt.index);
         out[f"{p}_year"] = dt.dt.year.fillna(0).astype(int)
         out[f"{p}_month"] = dt.dt.month.fillna(0).astype(int)
@@ -85,13 +86,13 @@ class DtPeDataConverter:
         return out
 
     @staticmethod
-    def _ratio(df, a, b):
+    def ratio(df, a, b):
         A = pd.to_numeric(df.get(a), errors='coerce')
         B = pd.to_numeric(df.get(b), errors='coerce')
         return (A / (B.replace(0, np.nan))).fillna(0)
 
     @staticmethod
-    def _topk(series, tokenizer, k, prefix):
+    def topk(series, tokenizer, k, prefix):
         from collections import Counter
         toks = []
         ctr = Counter()
