@@ -1,15 +1,23 @@
 import pandas as pd
+import numpy as np
+import re
 
 class DtPePreprocessMapper:
 
-
     def __init__(self, args, transformer):
         self.args = args
-        self.dt_pe_data_transformer = transformer
+        self.transformer = transformer
 
-    def map(self, data1):
+    def map(self, input_data):
         args = self.args
-        data2 = self.dt_pe_data_transformer.transform(data1, args.k_ident, args.k_dlls, args.k_apis, args.bit_count)
-        if args.label_col and args.label_col in data1.columns:
-            data2[args.label_col] = data1[args.label_col].values
-        return data2
+        out_array = self.transformer.transform(input_data, args.k_ident, args.k_dlls, args.k_apis, args.bit_count)
+        # Create DataFrame from out_array if it exits or else: return empty DataFrame with the correct row count.
+        output_data = pd.concat(out_array, axis=1) if out_array else pd.DataFrame(index=input_data.index)
+        # Remove infinite and missing values with zeros.
+        output_data = output_data.replace([np.inf, -np.inf], 0).fillna(0)
+        # Sanitizes column names.
+        output_data.columns = [re.sub(r"[^0-9A-Za-z_]+", "_", str(c)) for c in output_data.columns]
+        # Add label_col column to output
+        if args.label_col and args.label_col in input_data.columns:
+            output_data[args.label_col] = input_data[args.label_col].values
+        return output_data
