@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.count_dlls_column_transformer import CountDllsColumnTransformer
 from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
 from src.specific.dt.preprocess.frequency_column_transformer import FrequencyColumnTransformer
 from src.specific.dt.preprocess.int8_column_transformer import Int8ColumnTransformer
@@ -41,7 +42,10 @@ class ColumnTransformerRegistry:
         self.transformer_by_column = {
             'FirstSeenDate': FirstDateColumnTransformer(dt_parts, to_dt),
             'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
-            'ImportedDlls': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
+            'ImportedDlls': MultiColumnTransformer({
+                '{}': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
+                'n_imported_dlls': CountDllsColumnTransformer(parse_listish, clean_dll, k_dlls)
+             }),
             'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
             'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
             'Entropy': EntropyColumnTransformer(safe_num),
