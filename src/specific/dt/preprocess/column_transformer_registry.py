@@ -20,7 +20,7 @@ from src.specific.dt.preprocess.imported_dlls_column_transformer import Imported
 # Registry that maps column names to ColumnTransformer instances.
 class ColumnTransformerRegistry:
 
-    NUMERIC_COLUMNS = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
+    NUMERIC_COLUMNS = ['Size', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
             'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
             'NumberOfSections', 'NumberOfRvaAndSizes', 'NumberOfSymbols']
 
@@ -57,7 +57,10 @@ class ColumnTransformerRegistry:
             'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count),
             'Machine': CategoryColumnTransformer(),
             'PE_TYPE': CategoryColumnTransformer(),
-            'SizeOfCode': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage'),
+            'SizeOfCode': MultiColumnTransformer({
+                '{}': NumberColumnTransformer(safe_num),
+                'ratio_Code_Image': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage')
+            }),
             'SizeOfInitializedData': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size'),
             'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size'),
             'BaseOfData': MultiColumnTransformer({
