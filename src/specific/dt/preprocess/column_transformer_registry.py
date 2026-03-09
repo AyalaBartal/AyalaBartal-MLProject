@@ -62,7 +62,10 @@ class ColumnTransformerRegistry:
                 'ratio_Code_Image': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage')
             }),
             'SizeOfInitializedData': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size'),
-            'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size'),
+            'SizeOfHeaders': MultiColumnTransformer({
+                '{}': NumberColumnTransformer(safe_num),
+                'ratio_Headers_Size': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size')
+            }),
             'BaseOfData': MultiColumnTransformer({
                 '{}': NumberColumnTransformer(safe_num),
                 '{}_missing': MissingColumnTransformer()
