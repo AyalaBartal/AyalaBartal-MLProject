@@ -8,7 +8,7 @@ import time
 
 from src.common.precleanup import PePreprocessCleaner
 from src.specific.dt.preprocess import \
-    DtPeDataConverter, DtPeDataTransformer, DtPeDataPreprocessArgs, DtPePreprocessMapper
+    DtPeDataConverter, DtPeDataTransformer, DtPeDataPreprocessArgs, DtPePreprocessMapper, DtPePreprocessorProvider
 from tests.utils import PathsProvider
 
 
@@ -74,10 +74,7 @@ class TestCsvPipeline(unittest.TestCase):
         conv1: Callable[[Any], Any] = lambda data: pe_preprocess_cleaner.clean(data)
 
         # 2. Map original data to format dt trainer algorithm can use
-        converter = DtPeDataConverter()
-        dt_pe_data_transformer = DtPeDataTransformer(converter)
-        dt_pe_data_preprocess_args = DtPeDataPreprocessArgs(self.input_file, self.output_file)
-        mapper = DtPePreprocessMapper(dt_pe_data_preprocess_args, dt_pe_data_transformer)
+        mapper = DtPePreprocessorProvider.get_mapper()
         conv2: Callable[[Any], Any] = lambda data: mapper.map(data)
 
         return [
