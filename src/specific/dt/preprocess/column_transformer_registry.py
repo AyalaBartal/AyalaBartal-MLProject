@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
 from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
 from src.specific.dt.preprocess.imported_symbols_column_transformer import ImportedSymbolsColumnTransformer
 from src.specific.dt.preprocess.column_transformer import ColumnTransformer
@@ -30,7 +31,8 @@ class ColumnTransformerRegistry:
             'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
             'ImportedDlls': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
             'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
-            'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident)
+            'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
+            'Entropy': EntropyColumnTransformer(safe_num)
         }
 
     # Retrieve transformer for a column. KeyError if column not registered.

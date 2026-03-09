@@ -35,7 +35,6 @@ class DtPeDataTransformer:
         output.extend(self.calc_nums(data, safe_num))
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
         output.extend(self.calc_characteristics(data, bit_count, expand_bits, safe_num))
-        # output.extend(self.calc_identify(clean_ident, data, k_ident, topk))
 
         # calc_time
         print("columns to transformer: {}".format(registry.columns()))
@@ -74,14 +73,12 @@ class DtPeDataTransformer:
     def calc_nums(self, data, safe_num):
         nums = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
                 'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode', 'BaseOfData',
-                'NumberOfSections', 'NumberOfRvaAndSizes', 'Entropy', 'SizeOfOptionalHeader',
+                'NumberOfSections', 'NumberOfRvaAndSizes', 'SizeOfOptionalHeader',
                 'PointerToSymbolTable', 'NumberOfSymbols']
         pres = [c for c in nums if c in data.columns]
         output = []
         if pres:
             num = data[pres].apply(safe_num)
-            if 'Entropy' in num.columns:
-                num['Entropy'] = num['Entropy'].clip(0, 8)
             output.append(num)
         return output
 
