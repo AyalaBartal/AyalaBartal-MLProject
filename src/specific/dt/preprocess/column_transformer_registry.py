@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.frequency_column_transformer import FrequencyColumnTransformer
 from src.specific.dt.preprocess.int8_column_transformer import Int8ColumnTransformer
 from src.specific.dt.preprocess.missing_column_transformer import MissingColumnTransformer
 from src.specific.dt.preprocess.ratio_column_transformer import RatioColumnTransformer
@@ -54,7 +55,8 @@ class ColumnTransformerRegistry:
             'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size'),
             'BaseOfData': MissingColumnTransformer(),
             'PointerToSymbolTable': Int8ColumnTransformer(safe_num),
-            'NumberOfSymbols': Int8ColumnTransformer(safe_num)
+            'NumberOfSymbols': Int8ColumnTransformer(safe_num),
+            'SizeOfOptionalHeader': FrequencyColumnTransformer(safe_num)
         }
 
         for column in self.NUMERIC_COLUMNS:

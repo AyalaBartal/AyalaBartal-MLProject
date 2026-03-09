@@ -44,10 +44,6 @@ class DtPeDataTransformer:
     def calc_der(self, data, safe_num, clean_dll, parse_listish, clean_api):
         der = pd.DataFrame(index=data.index)
 
-        if 'SizeOfOptionalHeader' in data.columns:
-            so = safe_num(data['SizeOfOptionalHeader'])
-            der['optional_header_expected'] = so.isin([224, 240]).astype(np.int8)
-
         if 'ImportedDlls' in data.columns:
             der['n_imported_dlls'] = data['ImportedDlls'].apply(lambda v: len(clean_dll(parse_listish(v))))
         if 'ImportedSymbols' in data.columns:
