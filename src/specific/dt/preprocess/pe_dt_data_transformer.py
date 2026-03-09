@@ -26,13 +26,10 @@ class DtPeDataTransformer:
         ratio = self.converter.ratio
         parse_listish = self.converter.parse_listish
         expand_bits = self.converter.expand_bits
-        topk = self.converter.topk
-        clean_ident = self.converter.clean_ident
 
         registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident)
 
         output = []
-        output.extend(self.calc_nums(data, safe_num))
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
         output.extend(self.calc_characteristics(data, bit_count, expand_bits, safe_num))
 
@@ -45,12 +42,6 @@ class DtPeDataTransformer:
             output.extend(output_list_of_dt)
 
         return output
-
-    def calc_identify(self, clean_ident, data, k_ident, topk):
-        output2 = []
-        if 'Identify' in data.columns:
-            output2.append(topk(data['Identify'], clean_ident, k_ident, 'id'))
-        return output2
 
     def calc_characteristics(self, data, bit_count, expand_bits, safe_num):
         output = []
@@ -68,18 +59,6 @@ class DtPeDataTransformer:
             if col in data.columns:
                 category = data[col].astype('category')
                 output.append(pd.get_dummies(category, prefix=col, dummy_na=True))
-        return output
-
-    def calc_nums(self, data, safe_num):
-        nums = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
-                'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode', 'BaseOfData',
-                'NumberOfSections', 'NumberOfRvaAndSizes', 'SizeOfOptionalHeader',
-                'PointerToSymbolTable', 'NumberOfSymbols']
-        pres = [c for c in nums if c in data.columns]
-        output = []
-        if pres:
-            num = data[pres].apply(safe_num)
-            output.append(num)
         return output
 
     def calc_der(self, data, ratio, safe_num, clean_dll, parse_listish, clean_api):

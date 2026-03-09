@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
 from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
 from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
 from src.specific.dt.preprocess.imported_symbols_column_transformer import ImportedSymbolsColumnTransformer
@@ -10,6 +11,12 @@ from src.specific.dt.preprocess.imported_dlls_column_transformer import Imported
 Registry that maps column names to ColumnTransformer instances.
 """
 class ColumnTransformerRegistry:
+
+    NUMERIC_COLUMNS = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
+            'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode', 'BaseOfData',
+            'NumberOfSections', 'NumberOfRvaAndSizes', 'SizeOfOptionalHeader',
+            'PointerToSymbolTable', 'NumberOfSymbols']
+
 
     def __init__(self, converter, k_dlls, k_apis, k_ident):
         self.converter = converter
@@ -34,6 +41,9 @@ class ColumnTransformerRegistry:
             'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
             'Entropy': EntropyColumnTransformer(safe_num)
         }
+
+        for column in self.NUMERIC_COLUMNS:
+            self.transformer_by_column[column] = NumberColumnTransformer(safe_num)
 
     # Retrieve transformer for a column. KeyError if column not registered.
     def get(self, column_name: str) -> ColumnTransformer:

@@ -12,3 +12,4 @@ from .imported_dlls_column_transformer import ImportedDllsColumnTransformer
 from .imported_symbols_column_transformer import ImportedSymbolsColumnTransformer
 from .identify_column_transformer import IdentifyColumnTransformer
 from .entropy_column_transformer import EntropyColumnTransformer
+from .number_column_transformer import NumberColumnTransformer
