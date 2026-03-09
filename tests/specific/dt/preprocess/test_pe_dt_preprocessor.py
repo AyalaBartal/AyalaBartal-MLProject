@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 
-from src.specific.dt.preprocess import DtPeCsvPreprocessMapper, DtPePreprocessorProvider
+from src.specific.dt.preprocess import DtPeCsvPreprocessMapper, DtPePreprocessorProvider, DtPeDataPreprocessCsvArgs
 from tests.utils import PathsProvider
 
 
@@ -23,8 +23,9 @@ class TestPeDtPreprocessor(unittest.TestCase):
         print(f"\n{self.id()} took {duration:.4f} seconds")
 
     def test_pre_process_input_malware_csv_for_dt_success(self):
+        args = DtPeDataPreprocessCsvArgs(self.input_file, self.output_file)
         mapper = DtPePreprocessorProvider.get_mapper()
-        dt_pe_data_preprocessor = DtPeCsvPreprocessMapper(mapper)
-        dt_pe_data_preprocessor.map(self.input_file, self.output_file)
+        dt_pe_csv_preprocessor = DtPeCsvPreprocessMapper(mapper)
+        dt_pe_csv_preprocessor.map(args)
 
 

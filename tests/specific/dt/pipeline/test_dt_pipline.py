@@ -7,8 +7,7 @@ from src.common.pipeline.csv_pipline import CsvPipline
 import time
 
 from src.common.precleanup import PePreprocessCleaner
-from src.specific.dt.preprocess import \
-    DtPeDataConverter, DtPeDataTransformer, DtPeDataPreprocessArgs, DtPePreprocessMapper, DtPePreprocessorProvider
+from src.specific.dt.preprocess.pe_dt_preprocessor_provider import DtPePreprocessorProvider
 from tests.utils import PathsProvider
 
 
