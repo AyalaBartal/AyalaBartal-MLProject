@@ -20,4 +20,6 @@ class DtPePreprocessMapper:
         # Add label_col column to output
         if self.args.label_col and self.args.label_col in input_data.columns:
             output_data[self.args.label_col] = input_data[self.args.label_col].values
+        # Sort columns by alphabet order
+        output_data = output_data.sort_index(axis=1)
         return output_data
