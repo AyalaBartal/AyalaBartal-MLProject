@@ -29,7 +29,7 @@ class DtPeDataTransformer:
         registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident, bit_count)
 
         output = []
-        output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
+        output.append(self.calc_der(data, safe_num, clean_dll, parse_listish, clean_api))
 
         # calc_time
         print("columns to transformer: {}".format(registry.columns()))
@@ -41,22 +41,9 @@ class DtPeDataTransformer:
 
         return output
 
-    def calc_characteristics(self, data, bit_count, expand_bits, safe_num):
-        output = []
-        for col in ['Machine', 'PE_TYPE']:
-            if col in data.columns:
-                category = data[col].astype('category')
-                output.append(pd.get_dummies(category, prefix=col, dummy_na=True))
-        return output
-
-    def calc_der(self, data, ratio, safe_num, clean_dll, parse_listish, clean_api):
+    def calc_der(self, data, safe_num, clean_dll, parse_listish, clean_api):
         der = pd.DataFrame(index=data.index)
-        if {'SizeOfCode', 'SizeOfImage'}.issubset(data.columns):
-            der['ratio_Code_Image'] = ratio(data, 'SizeOfCode', 'SizeOfImage')
-        if {'SizeOfInitializedData', 'Size'}.issubset(data.columns):
-            der['ratio_InitData_Size'] = ratio(data, 'SizeOfInitializedData', 'Size')
-        if {'SizeOfHeaders', 'Size'}.issubset(data.columns):
-            der['ratio_Headers_Size'] = ratio(data, 'SizeOfHeaders', 'Size')
+
         if 'BaseOfData' in data.columns:
             der['BaseOfData_missing'] = data['BaseOfData'].isna().astype(np.int8)
         if 'PointerToSymbolTable' in data.columns:

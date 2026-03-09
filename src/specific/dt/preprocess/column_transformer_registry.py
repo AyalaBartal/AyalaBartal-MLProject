@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.ratio_column_transformer import RatioColumnTransformer
 from src.specific.dt.preprocess.category_column_transformer import CategoryColumnTransformer
 from src.specific.dt.preprocess.characteristics_column_transformer import CharacteristicsColumnTransformer
 from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
@@ -45,7 +46,10 @@ class ColumnTransformerRegistry:
             'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', bit_count),
             'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count),
             'Machine': CategoryColumnTransformer(),
-            'PE_TYPE': CategoryColumnTransformer()
+            'PE_TYPE': CategoryColumnTransformer(),
+            'SizeOfCode': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage'),
+            'SizeOfInitializedData': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size'),
+            'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size')
         }
 
         for column in self.NUMERIC_COLUMNS:
