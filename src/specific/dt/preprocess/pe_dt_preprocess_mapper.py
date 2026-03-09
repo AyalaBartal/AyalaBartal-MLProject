@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 
+
 class DtPePreprocessMapper:
 
     def __init__(self, args, transformer):
@@ -10,7 +11,7 @@ class DtPePreprocessMapper:
 
     def map(self, input_data):
         args = self.args
-        out_array = self.transformer.transform(input_data, args.k_ident, args.k_dlls, args.k_apis, args.bit_count)
+        out_array = self.transformer.transform(input_data)
         # Create DataFrame from out_array if it exits or else: return empty DataFrame with the correct row count.
         output_data = pd.concat(out_array, axis=1) if out_array else pd.DataFrame(index=input_data.index)
         # Remove infinite and missing values with zeros.

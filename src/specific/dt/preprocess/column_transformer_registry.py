@@ -13,9 +13,8 @@ from src.specific.dt.preprocess.first_date_column_transformer import FirstDateCo
 from src.specific.dt.preprocess.compile_time_column_transformer import CompileTimeColumnTransformer
 from src.specific.dt.preprocess.imported_dlls_column_transformer import ImportedDllsColumnTransformer
 
-"""
-Registry that maps column names to ColumnTransformer instances.
-"""
+
+# Registry that maps column names to ColumnTransformer instances.
 class ColumnTransformerRegistry:
 
     NUMERIC_COLUMNS = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
@@ -23,7 +22,7 @@ class ColumnTransformerRegistry:
             'NumberOfSections', 'NumberOfRvaAndSizes', 'SizeOfOptionalHeader',
             'PointerToSymbolTable', 'NumberOfSymbols']
 
-
+    # Args: top identifiers, top imported DLLs and top imported DLLs. Used bit_count is when expanding bitmask fields.
     def __init__(self, converter, k_dlls, k_apis, k_ident, bit_count):
         self.converter = converter
 
