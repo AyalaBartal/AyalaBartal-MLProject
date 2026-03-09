@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
 from src.specific.dt.preprocess.imported_symbols_column_transformer import ImportedSymbolsColumnTransformer
 from src.specific.dt.preprocess.column_transformer import ColumnTransformer
 from src.specific.dt.preprocess.first_date_column_transformer import FirstDateColumnTransformer
@@ -9,7 +10,7 @@ Registry that maps column names to ColumnTransformer instances.
 """
 class ColumnTransformerRegistry:
 
-    def __init__(self, converter, k_dlls, k_apis):
+    def __init__(self, converter, k_dlls, k_apis, k_ident):
         self.converter = converter
 
         safe_num = self.converter.safe_num
@@ -28,7 +29,8 @@ class ColumnTransformerRegistry:
             'FirstSeenDate': FirstDateColumnTransformer(dt_parts, to_dt),
             'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
             'ImportedDlls': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
-            'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis)
+            'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
+            'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident)
         }
 
     # Retrieve transformer for a column. KeyError if column not registered.

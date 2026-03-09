@@ -29,19 +29,20 @@ class DtPeDataTransformer:
         topk = self.converter.topk
         clean_ident = self.converter.clean_ident
 
-        registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis)
+        registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident)
 
         output = []
         output.extend(self.calc_nums(data, safe_num))
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
         output.extend(self.calc_characteristics(data, bit_count, expand_bits, safe_num))
-        output.extend(self.calc_identify(clean_ident, data, k_ident, topk))
+        # output.extend(self.calc_identify(clean_ident, data, k_ident, topk))
 
         # calc_time
         print("columns to transformer: {}".format(registry.columns()))
         for column in registry.columns():
             transformer = registry.get(column)
             output_list_of_dt = transformer.valid_transform(data, column)
+            out_class_name = output_list_of_dt.__class__.__name__
             output.extend(output_list_of_dt)
 
         return output
