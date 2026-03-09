@@ -27,7 +27,7 @@ class DtPeDataTransformer:
         parse_listish = self.converter.parse_listish
         expand_bits = self.converter.expand_bits
 
-        registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident)
+        registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident, bit_count)
 
         output = []
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
@@ -45,16 +45,6 @@ class DtPeDataTransformer:
 
     def calc_characteristics(self, data, bit_count, expand_bits, safe_num):
         output = []
-        for col, p in [('Characteristics', 'char'), ('DllCharacteristics', 'dllc')]:
-            if col in data.columns:
-                if expand_bits:
-                    value0 = data[col]
-                    part1 = expand_bits(value0, bit_count, p)
-                    output.append(part1)
-                value1 = data[col]
-                value2 = safe_num(value1)
-                value3 = value2.rename(f"{p}_raw").to_frame()
-                output.append(value3)
         for col in ['Machine', 'PE_TYPE']:
             if col in data.columns:
                 category = data[col].astype('category')

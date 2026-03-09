@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.characteristics_column_transformer import CharacteristicsColumnTransformer
 from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
 from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
 from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
@@ -18,7 +19,7 @@ class ColumnTransformerRegistry:
             'PointerToSymbolTable', 'NumberOfSymbols']
 
 
-    def __init__(self, converter, k_dlls, k_apis, k_ident):
+    def __init__(self, converter, k_dlls, k_apis, k_ident, bit_count):
         self.converter = converter
 
         safe_num = self.converter.safe_num
@@ -39,7 +40,9 @@ class ColumnTransformerRegistry:
             'ImportedDlls': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
             'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
             'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
-            'Entropy': EntropyColumnTransformer(safe_num)
+            'Entropy': EntropyColumnTransformer(safe_num),
+            'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', bit_count),
+            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count)
         }
 
         for column in self.NUMERIC_COLUMNS:

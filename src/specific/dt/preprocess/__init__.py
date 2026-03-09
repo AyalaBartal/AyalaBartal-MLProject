@@ -13,3 +13,4 @@ from .imported_symbols_column_transformer import ImportedSymbolsColumnTransforme
 from .identify_column_transformer import IdentifyColumnTransformer
 from .entropy_column_transformer import EntropyColumnTransformer
 from .number_column_transformer import NumberColumnTransformer
+from .characteristics_column_transformer import CharacteristicsColumnTransformer
