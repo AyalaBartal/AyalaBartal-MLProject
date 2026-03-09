@@ -22,7 +22,7 @@ class ColumnTransformerRegistry:
 
     NUMERIC_COLUMNS = ['Size', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
             'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
-            'NumberOfSections', 'NumberOfRvaAndSizes', 'NumberOfSymbols']
+            'NumberOfSections', 'NumberOfRvaAndSizes']
 
     # Args: top identifiers, top imported DLLs and top imported DLLs. Used bit_count is when expanding bitmask fields.
     def __init__(self, converter, k_dlls, k_apis, k_ident, bit_count):
@@ -77,8 +77,10 @@ class ColumnTransformerRegistry:
                 'has_symtab': Int8ColumnTransformer(safe_num),
                 '{}': NumberColumnTransformer(safe_num)
             }),
-            'NumberOfSymbols': Int8ColumnTransformer(safe_num),
-            # 'SizeOfOptionalHeader': FrequencyColumnTransformer(safe_num)
+            'NumberOfSymbols': MultiColumnTransformer({
+                '{}': NumberColumnTransformer(safe_num),
+                'symbols_nonzero': Int8ColumnTransformer(safe_num)
+            }),
             'SizeOfOptionalHeader': MultiColumnTransformer({
                 '{}': NumberColumnTransformer(safe_num),
                 'optional_header_expected': FrequencyColumnTransformer(safe_num)
