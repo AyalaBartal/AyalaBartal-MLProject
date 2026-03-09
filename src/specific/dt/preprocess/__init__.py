@@ -14,3 +14,4 @@ from .identify_column_transformer import IdentifyColumnTransformer
 from .entropy_column_transformer import EntropyColumnTransformer
 from .number_column_transformer import NumberColumnTransformer
 from .characteristics_column_transformer import CharacteristicsColumnTransformer
+from .category_column_transformer import CategoryColumnTransformer

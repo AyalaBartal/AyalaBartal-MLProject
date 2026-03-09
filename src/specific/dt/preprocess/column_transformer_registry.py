@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.category_column_transformer import CategoryColumnTransformer
 from src.specific.dt.preprocess.characteristics_column_transformer import CharacteristicsColumnTransformer
 from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
 from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
@@ -42,7 +43,9 @@ class ColumnTransformerRegistry:
             'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
             'Entropy': EntropyColumnTransformer(safe_num),
             'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', bit_count),
-            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count)
+            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count),
+            'Machine': CategoryColumnTransformer(),
+            'PE_TYPE': CategoryColumnTransformer()
         }
 
         for column in self.NUMERIC_COLUMNS:

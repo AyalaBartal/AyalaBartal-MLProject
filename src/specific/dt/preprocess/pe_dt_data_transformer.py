@@ -25,13 +25,11 @@ class DtPeDataTransformer:
         clean_api = self.converter.clean_api
         ratio = self.converter.ratio
         parse_listish = self.converter.parse_listish
-        expand_bits = self.converter.expand_bits
 
         registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis, k_ident, bit_count)
 
         output = []
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
-        output.extend(self.calc_characteristics(data, bit_count, expand_bits, safe_num))
 
         # calc_time
         print("columns to transformer: {}".format(registry.columns()))
