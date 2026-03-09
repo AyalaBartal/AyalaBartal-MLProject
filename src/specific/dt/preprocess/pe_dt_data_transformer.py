@@ -44,8 +44,6 @@ class DtPeDataTransformer:
     def calc_der(self, data, safe_num, clean_dll, parse_listish, clean_api):
         der = pd.DataFrame(index=data.index)
 
-        if 'BaseOfData' in data.columns:
-            der['BaseOfData_missing'] = data['BaseOfData'].isna().astype(np.int8)
         if 'PointerToSymbolTable' in data.columns:
             der['has_symtab'] = (safe_num(data['PointerToSymbolTable']) > 0).astype(np.int8)
         if 'NumberOfSymbols' in data.columns:

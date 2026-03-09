@@ -16,3 +16,4 @@ from .number_column_transformer import NumberColumnTransformer
 from .characteristics_column_transformer import CharacteristicsColumnTransformer
 from .category_column_transformer import CategoryColumnTransformer
 from .ratio_column_transformer import RatioColumnTransformer
+from .missing_column_transformer import MissingColumnTransformer
