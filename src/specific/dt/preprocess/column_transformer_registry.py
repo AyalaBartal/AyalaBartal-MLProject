@@ -20,9 +20,8 @@ from src.specific.dt.preprocess.imported_dlls_column_transformer import Imported
 # Registry that maps column names to ColumnTransformer instances.
 class ColumnTransformerRegistry:
 
-    NUMERIC_COLUMNS = ['Size', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
-            'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
-            'NumberOfSections', 'NumberOfRvaAndSizes']
+    NUMERIC_COLUMNS = ['Size', 'SizeOfImage', 'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
+                       'NumberOfSections', 'NumberOfRvaAndSizes']
 
     # Args: top identifiers, top imported DLLs and top imported DLLs. Used bit_count is when expanding bitmask fields.
     def __init__(self, converter, k_dlls, k_apis, k_ident, bit_count):
