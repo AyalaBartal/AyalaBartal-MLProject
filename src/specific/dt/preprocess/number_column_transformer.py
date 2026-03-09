@@ -11,10 +11,5 @@ class NumberColumnTransformer(ColumnTransformer):
         self.safe_num = safe_num
 
     def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
-        nums = [column_name]
-        pres = [c for c in nums if c in data.columns]
-        output = []
-        if pres:
-            num = data[pres].apply(self.safe_num)
-            output.append(num)
-        return output
+        df = self.safe_num(data[column_name]).to_frame(name=column_name)
+        return [df]
