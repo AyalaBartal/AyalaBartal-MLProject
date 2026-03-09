@@ -1,11 +1,11 @@
 import pandas as pd
 
-from src.specific.dt.preprocess import DtPeDataPreprocessCsvArgs
+from src.specific.dt.preprocess import DtPeDataPreprocessCsvArgs, DtPePreprocessMapper
 
 
 class DtPeCsvPreprocessMapper:
 
-    def __init__(self, mapper):
+    def __init__(self, mapper: DtPePreprocessMapper):
         self.mapper = mapper
 
     def map(self, args: DtPeDataPreprocessCsvArgs):
