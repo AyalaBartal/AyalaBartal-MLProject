@@ -9,4 +9,5 @@ from src.specific.dt.preprocess.column_transformer import ColumnTransformer
 class MissingColumnTransformer(ColumnTransformer):
 
     def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
-        return data[column_name].isna().astype(np.int8)
+        df = data[[column_name]].isna().astype(np.int8)
+        return [df]
