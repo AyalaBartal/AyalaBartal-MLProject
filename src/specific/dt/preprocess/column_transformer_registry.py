@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.count_apis_column_transformer import CountApisColumnTransformer
 from src.specific.dt.preprocess.count_dlls_column_transformer import CountDllsColumnTransformer
 from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
 from src.specific.dt.preprocess.frequency_column_transformer import FrequencyColumnTransformer
@@ -44,9 +45,12 @@ class ColumnTransformerRegistry:
             'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
             'ImportedDlls': MultiColumnTransformer({
                 '{}': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
-                'n_imported_dlls': CountDllsColumnTransformer(parse_listish, clean_dll, k_dlls)
+                'n_imported_dlls': CountDllsColumnTransformer(parse_listish, clean_dll)
              }),
-            'ImportedSymbols': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
+            'ImportedSymbols': MultiColumnTransformer({
+                '{}': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
+                'n_imported_symbols': CountApisColumnTransformer(parse_listish, clean_api)
+            }),
             'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
             'Entropy': EntropyColumnTransformer(safe_num),
             'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', bit_count),
