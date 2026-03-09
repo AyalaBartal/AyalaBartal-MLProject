@@ -37,6 +37,11 @@ class MultiColumnTransformer(ColumnTransformer):
             out_all.extend(after_rename_frames)
         return out_all
 
+    def get_transformer_names(self) -> List[str]:
+        values = list(self.transformer_by_name.values())
+        names = [v.__class__.__name__ for v in values]
+        return sorted(names)
+
     def rename_frames(self, before_rename_frames: List[pd.DataFrame], template_column_name: str) -> List[pd.DataFrame]:
         after_rename_frames = []
         for frame in before_rename_frames:
