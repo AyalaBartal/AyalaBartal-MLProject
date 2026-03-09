@@ -21,4 +21,5 @@ from .ratio_column_transformer import RatioColumnTransformer
 from .missing_column_transformer import MissingColumnTransformer
 from .int8_column_transformer import Int8ColumnTransformer
 from .frequency_column_transformer import FrequencyColumnTransformer
+from .multi_column_transformer import MultiColumnTransformer
 

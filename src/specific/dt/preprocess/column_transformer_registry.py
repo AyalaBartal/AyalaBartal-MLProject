@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
 from src.specific.dt.preprocess.frequency_column_transformer import FrequencyColumnTransformer
 from src.specific.dt.preprocess.int8_column_transformer import Int8ColumnTransformer
 from src.specific.dt.preprocess.missing_column_transformer import MissingColumnTransformer
@@ -18,7 +19,7 @@ from src.specific.dt.preprocess.imported_dlls_column_transformer import Imported
 class ColumnTransformerRegistry:
 
     NUMERIC_COLUMNS = ['Size', 'SizeOfCode', 'SizeOfHeaders', 'SizeOfImage', 'SizeOfInitializedData',
-            'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode', 'BaseOfData',
+            'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
             'NumberOfSections', 'NumberOfRvaAndSizes', 'SizeOfOptionalHeader',
             'PointerToSymbolTable', 'NumberOfSymbols']
 
@@ -52,7 +53,10 @@ class ColumnTransformerRegistry:
             'SizeOfCode': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage'),
             'SizeOfInitializedData': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size'),
             'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size'),
-            'BaseOfData': MissingColumnTransformer(),
+            'BaseOfData': MultiColumnTransformer({
+                '{}': NumberColumnTransformer(safe_num),
+                '{}_missing': MissingColumnTransformer()
+            }),
             'PointerToSymbolTable': Int8ColumnTransformer(safe_num),
             'NumberOfSymbols': Int8ColumnTransformer(safe_num),
             'SizeOfOptionalHeader': FrequencyColumnTransformer(safe_num)
