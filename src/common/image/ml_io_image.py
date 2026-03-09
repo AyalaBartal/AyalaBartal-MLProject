@@ -12,7 +12,7 @@ class MlIoImageWriter:
         dot_exe = self.executableLocator.get_dot_executable()
         self.file_validator.validate_file_readable(input_file)
         self.file_validator.validate_file_executable(dot_exe)
-        self.file_validator.validate_file_writable(out_file)
+        self.file_validator.validate_file_writeable(out_file)
         self.processExecutor.run([str(dot_exe), "-Tjpg",input_file, "-o", out_file], check=True)
 
     @staticmethod
