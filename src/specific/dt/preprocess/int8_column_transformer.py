@@ -14,4 +14,5 @@ class Int8ColumnTransformer(ColumnTransformer):
     def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
         column_data = data[column_name]
         positive_numbers = self.safe_num(column_data) > 0
-        return positive_numbers.astype(np.int8)
+        df = positive_numbers.astype(np.int8).to_frame(name=column_name)
+        return [df]
