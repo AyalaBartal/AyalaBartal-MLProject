@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import List
 import pandas as pd
 
 """
@@ -22,7 +22,7 @@ import pandas as pd
 
 class ColumnTransformer(ABC):
 
-    def transform(self, data: pd.DataFrame, column_name: str) -> List[Any]:
+    def transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
         self.validate_transform_args(data, column_name)
         return self.valid_transform(data, column_name)
 
@@ -34,4 +34,4 @@ class ColumnTransformer(ABC):
             raise ValueError("Not found column {} in data at transformer {}".format(column_name, transformer_name))
 
     @abstractmethod
-    def valid_transform(self, df: pd.DataFrame, column_name: str) -> list[Any]: raise RuntimeError
+    def valid_transform(self, df: pd.DataFrame, column_name: str) -> list[pd.DataFrame]: raise RuntimeError

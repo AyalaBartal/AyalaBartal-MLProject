@@ -8,3 +8,5 @@ from .column_transformer import ColumnTransformer
 from .column_transformer_registry import ColumnTransformerRegistry
 from .first_date_column_transformer import FirstDateColumnTransformer
 from .compile_time_column_transformer import CompileTimeColumnTransformer
+from .imported_dlls_column_transformer import ImportedDllsColumnTransformer
+from .imported_symbols_column_transformer import ImportedSymbolsColumnTransformer

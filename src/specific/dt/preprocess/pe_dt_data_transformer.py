@@ -29,28 +29,21 @@ class DtPeDataTransformer:
         topk = self.converter.topk
         clean_ident = self.converter.clean_ident
 
-        registry = ColumnTransformerRegistry(self.converter)
+        registry = ColumnTransformerRegistry(self.converter, k_dlls, k_apis)
 
         output = []
         output.extend(self.calc_nums(data, safe_num))
         output.append(self.calc_der(data, ratio, safe_num, clean_dll, parse_listish, clean_api))
         output.extend(self.calc_characteristics(data, bit_count, expand_bits, safe_num))
         output.extend(self.calc_identify(clean_ident, data, k_ident, topk))
-        output.extend(self.calc_dlls(data, k_apis, k_dlls, topk, clean_dll, clean_api, parse_listish))
 
         # calc_time
+        print("columns to transformer: {}".format(registry.columns()))
         for column in registry.columns():
             transformer = registry.get(column)
-            output.extend(transformer.valid_transform(data, column))
+            output_list_of_dt = transformer.valid_transform(data, column)
+            output.extend(output_list_of_dt)
 
-        return output
-
-    def calc_dlls(self, data, k_apis, k_dlls, topk, clean_dll, clean_api, parse_listish):
-        output = []
-        if 'ImportedDlls' in data.columns:
-            output.append(topk(data['ImportedDlls'], lambda v: clean_dll(parse_listish(v)), k_dlls, 'dll'))
-        if 'ImportedSymbols' in data.columns:
-            output.append(topk(data['ImportedSymbols'], lambda v: clean_api(parse_listish(v)), k_apis, 'api'))
         return output
 
     def calc_identify(self, clean_ident, data, k_ident, topk):

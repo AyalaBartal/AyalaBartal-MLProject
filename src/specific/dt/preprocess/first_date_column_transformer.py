@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Callable, List
 import pandas as pd
 import numpy as np
 
@@ -14,7 +14,7 @@ class FirstDateColumnTransformer(ColumnTransformer):
         # to_dt: converts a value (or column) into a datetime using pandas.
         self.to_dt = to_dt
 
-    def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[Any]:
+    def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
         output = []
         dt = self.to_dt(data['FirstSeenDate'])
         output.append(self.dt_parts(dt, 'FirstSeen'))
