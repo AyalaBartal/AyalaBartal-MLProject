@@ -1,3 +1,4 @@
+from src.specific.dt.preprocess.int8_column_transformer import Int8ColumnTransformer
 from src.specific.dt.preprocess.missing_column_transformer import MissingColumnTransformer
 from src.specific.dt.preprocess.ratio_column_transformer import RatioColumnTransformer
 from src.specific.dt.preprocess.category_column_transformer import CategoryColumnTransformer
@@ -51,7 +52,9 @@ class ColumnTransformerRegistry:
             'SizeOfCode': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage'),
             'SizeOfInitializedData': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size'),
             'SizeOfHeaders': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size'),
-            'BaseOfData': MissingColumnTransformer()
+            'BaseOfData': MissingColumnTransformer(),
+            'PointerToSymbolTable': Int8ColumnTransformer(safe_num),
+            'NumberOfSymbols': Int8ColumnTransformer(safe_num)
         }
 
         for column in self.NUMERIC_COLUMNS:
