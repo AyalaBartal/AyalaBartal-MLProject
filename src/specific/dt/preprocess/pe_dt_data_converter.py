@@ -82,19 +82,6 @@ class DtPeDataConverter:
         # fillna(0): replace NaN or missing data with 0.
         return pd.to_numeric(value, errors='coerce').fillna(0)
 
-    # Converts an integer column into multiple binary feature columns, one column per bits position.
-    @staticmethod
-    def expand_bits2(series, n_bits, prefix):
-        # coerce: If conversion fails → return NaN instead of crashing.
-        # fillna(0): replace NaN or missing data with 0.
-        # astype convert int64 that supports up to 64 bits.
-        x = pd.to_numeric(series, errors='coerce').fillna(0).astype(np.uint64)
-        # Convert number to bits.
-        # Shift 1 bit
-        # Convert from int64 to int8 This saves memory (1 byte not 8 bytes).
-        bits = {f"{prefix}_b{i}": ((x >> i) & 1).astype(np.int8) for i in range(n_bits)}
-        return pd.DataFrame(bits, index=series.index)
-
     # Expands a numeric bitmask column into multiple binary feature columns.
     # Instead of one number, the method creates separate columns for each bit.
     @staticmethod
