@@ -3,7 +3,10 @@ import json, os
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 from joblib import load
 
-from src.common.image.ml_io_image import MlIoImageWriter
+from src.common.image.file_io_validator import FileIoValidator
+from src.common.plot import MlIoPlotWriter
+from src.common.plot.confusion_matrix_spec_factory import ConfusionMatrixPlotSpecFactory
+from src.common.plot.matplotlib_plot_renderer import MatplotlibPlotRenderer
 from src.specific.dt.evaluate.file_util import FileUtil
 
 
@@ -31,7 +34,12 @@ class DtPeDataEvaluator:
 
         self.write_out_json(acc, args, auc, cm)
         self.write_out_md(acc, args, auc, cm)
-        MlIoImageWriter.create_plot(args.out_png, cm)
+
+        file_validator = FileIoValidator()
+        spec_factory = ConfusionMatrixPlotSpecFactory()
+        plot_renderer = MatplotlibPlotRenderer()
+        plot_writer = MlIoPlotWriter(file_validator, spec_factory, plot_renderer)
+        plot_writer.create_plot(args.out_png, cm)
 
         print("End DtPeDataEvaluator")
 
