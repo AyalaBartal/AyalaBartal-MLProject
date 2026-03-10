@@ -80,9 +80,13 @@ class DtPeDataFrameConverter:
     # Return Nan if a or b are invalid or if b is NaN.
     @staticmethod
     def ratio(df, a, b):
-        a_value = pd.to_numeric(df.get(a), errors='coerce')
-        b_value = pd.to_numeric(df.get(b), errors='coerce')
-        return (a_value / (b_value.replace(0, np.nan))).fillna(0)
+        if a not in df.columns or b not in df.columns:
+            return pd.Series(0.0, index=df.index)
+
+        a_value = pd.to_numeric(df[a], errors='coerce')
+        b_value = pd.to_numeric(df[b], errors='coerce').replace(0, np.nan)
+
+        return (a_value / b_value).fillna(0)
 
     # This method converts a text column into numeric ML features using the top K most common words.
     @staticmethod
