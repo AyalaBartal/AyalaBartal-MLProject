@@ -11,11 +11,8 @@ It depends on the plot-spec data classes, but does not depend on matplotlib or a
 
 
 class PlotRender(ABC):
-    """
-    Render the given plot specification and save it to the output path. Parameters
-    spec: Immutable description of what should be drawn.
-    out_png: Output file path for the generated image.
-    """
+
+    # Render the given plot using specification
     @abstractmethod
-    def render_and_save(self, spec: ConfusionMatrixPlotSpec, out_png: str) -> None:
+    def render(self, spec: ConfusionMatrixPlotSpec) -> None:
         raise NotImplementedError

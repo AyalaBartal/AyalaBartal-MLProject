@@ -39,27 +39,15 @@ Non-responsibilities:
 
 class MatplotlibPlotRenderer:
 
-    """
-    Render the given plot specification and save the resulting image.
-    spec: Immutable plot description containing all data needed to render the confusion matrix.
-    out_png: Output path for the generated PNG file.
-    """
-    def render_and_save(self, spec: ConfusionMatrixPlotSpec, out_png: str) -> None:
+    def render(self, spec: ConfusionMatrixPlotSpec):
         fig, ax = plt.subplots(figsize=spec.fig_size)
-        try:
-            # Render confusion matrix heatmap
-            im = ax.imshow(spec.matrix, cmap=spec.cmap)
-            MatplotlibPlotRenderer.draw_all_spec_annotations(ax, spec)
-            MatplotlibPlotRenderer.draw_all_titles_and_axis_labels(ax, spec)
-            MatplotlibPlotRenderer.draw_all_axis_ticks(ax, spec)
-
-            fig.colorbar(im, ax=ax, fraction=spec.colorbar_fraction, pad=spec.colorbar_pad)
-            fig.tight_layout()
-            fig.savefig(out_png, dpi=spec.dpi)
-
-        finally:
-            # Ensure figure is always closed to prevent memory leaks
-            plt.close(fig)
+        im = ax.imshow(spec.matrix, cmap=spec.cmap)
+        self.draw_all_spec_annotations(ax, spec)
+        self.draw_all_titles_and_axis_labels(ax, spec)
+        self.draw_all_axis_ticks(ax, spec)
+        fig.colorbar(im, ax=ax, fraction=spec.colorbar_fraction, pad=spec.colorbar_pad)
+        fig.tight_layout()
+        return fig
 
     @staticmethod
     def draw_all_axis_ticks(ax, spec):
