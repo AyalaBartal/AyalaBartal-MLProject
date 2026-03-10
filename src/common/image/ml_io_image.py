@@ -1,27 +1,19 @@
-import os
-
 import numpy as np
 import matplotlib.pyplot as plt
-import subprocess
-from pathlib import Path
-from src.common.image.executable_locator import ExecutableLocator
-
 
 class MlIoImageWriter:
 
-    @staticmethod
-    def create_jpg_from_dot(input_file, out_file):
-        dot_exe = Path(ExecutableLocator.get_dot_executable())
-        print('input_file={}'.format(input_file))
-        print('output_file={}'.format(out_file))
-        print('dot_exe_path={}'.format(dot_exe))
+    def __init__(self, validator, locator, executor):
+        self.file_validator = validator
+        self.executableLocator = locator
+        self.processExecutor = executor
 
-        if not os.path.isfile(input_file):
-            raise ValueError("File {} does not exist".format(input_file))
-        if not os.path.isfile(dot_exe):
-            raise ValueError("File {} does not exist".format(dot_exe))
-
-        subprocess.run([str(dot_exe), "-Tjpg",input_file, "-o", out_file], check=True)
+    def create_jpg_from_dot(self, input_file, out_file):
+        dot_exe = self.executableLocator.get_dot_executable()
+        self.file_validator.validate_file_readable(input_file)
+        self.file_validator.validate_file_executable(dot_exe)
+        self.file_validator.validate_file_writeable(out_file)
+        self.processExecutor.run([str(dot_exe), "-Tjpg",input_file, "-o", out_file], check=True)
 
     @staticmethod
     def create_plot(out_png, cm):

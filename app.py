@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 import pandas as pd
-import numpy as np
 import os
 import sys
 import json
 from werkzeug.utils import secure_filename
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
+
+from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
+from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -133,8 +135,10 @@ def predict_raw():
         from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
         
         converter = DtPeDataConverter()
-        transformer = DtPeDataTransformer(converter)
-        X_transformed = transformer.transform(df, k_ident=100, k_dlls=100, k_apis=200, bit_count=16)
+        args = DtPeDataPreprocessMapArgs()
+        registry = ColumnTransformerRegistry(converter, args.k_dlls, args.k_apis, args.k_ident, args.bit_count)
+        transformer = DtPeDataTransformer(registry)
+        X_transformed = transformer.transform(df)
         
         # Align with model features
         model_features = FEATURE_NAMES
@@ -204,8 +208,10 @@ def upload_file():
                     from src.specific.dt.preprocess.pe_dt_data_converter import DtPeDataConverter
                     from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
                     
-                    converter = DtPeDataConverter()
-                    transformer = DtPeDataTransformer(converter)
+                    conv = DtPeDataConverter()
+                    args = DtPeDataPreprocessMapArgs()
+                    registry = ColumnTransformerRegistry(conv, args.k_dlls, args.k_apis, args.k_ident, args.bit_count)
+                    transformer = DtPeDataTransformer(registry)
                     
                     # Transform with same parameters as training
                     # Process in batches and skip rows that fail
@@ -215,7 +221,7 @@ def upload_file():
                     for idx in range(len(df_features)):
                         try:
                             row_df = df_features.iloc[idx:idx+1]
-                            X_row = transformer.transform(row_df, k_ident=100, k_dlls=100, k_apis=200, bit_count=16)
+                            X_row = transformer.transform(row_df)
                             successful_rows.append(X_row)
                         except Exception as row_error:
                             failed_indices.append(idx)

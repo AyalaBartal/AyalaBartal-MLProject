@@ -3,6 +3,8 @@ import unittest
 import os
 import time
 
+from src.common.image import ExecutableLocator, ProcessExecutor
+from src.common.image.file_io_validator import FileIoValidator
 from src.common.image.ml_io_image import MlIoImageWriter
 from tests.utils import PathsProvider
 
@@ -22,4 +24,9 @@ class TestPeDtPreprocessor(unittest.TestCase):
         data_dir = PathsProvider.get_test_data_dir()
         input_file = os.path.join(data_dir, 'specific', 'dt', 'train', 'output', 'dt_report', 'decision_tree_model.dot')
         out_file = os.path.join(data_dir, 'specific', 'dt', 'train', 'output', 'dt_report', 'decision_tree_model.jpg')
-        MlIoImageWriter.create_jpg_from_dot(input_file, out_file)
+
+        validator = FileIoValidator()
+        locator = ExecutableLocator()
+        executor = ProcessExecutor()
+        image_writer = MlIoImageWriter(validator, locator, executor)
+        image_writer.create_jpg_from_dot(input_file, out_file)
