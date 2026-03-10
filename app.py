@@ -6,6 +6,7 @@ import json
 from werkzeug.utils import secure_filename
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 
+from src.specific.dt.preprocess import DtPeStringConverter, DtPeListConverter, DtPePreprocessorProvider
 from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
 from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
 
@@ -131,13 +132,7 @@ def predict_raw():
         df = pd.DataFrame([raw_data])
         
         # Preprocess
-        from src.specific.dt.preprocess.pe_dt_data_converter import DtPeDataConverter
-        from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
-        
-        converter = DtPeDataConverter()
-        args = DtPeDataPreprocessMapArgs()
-        registry = ColumnTransformerRegistry(converter, args.k_dlls, args.k_apis, args.k_ident, args.bit_count)
-        transformer = DtPeDataTransformer(registry)
+        transformer = DtPePreprocessorProvider.get_transformer()
         X_transformed = transformer.transform(df)
         
         # Align with model features
@@ -205,14 +200,8 @@ def upload_file():
                 
                 try:
                     # Import and use the preprocessing classes
-                    from src.specific.dt.preprocess.pe_dt_data_converter import DtPeDataConverter
-                    from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
-                    
-                    conv = DtPeDataConverter()
-                    args = DtPeDataPreprocessMapArgs()
-                    registry = ColumnTransformerRegistry(conv, args.k_dlls, args.k_apis, args.k_ident, args.bit_count)
-                    transformer = DtPeDataTransformer(registry)
-                    
+                    transformer = DtPePreprocessorProvider.get_transformer()
+
                     # Transform with same parameters as training
                     # Process in batches and skip rows that fail
                     successful_rows = []

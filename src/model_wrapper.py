@@ -9,13 +9,12 @@ from sklearn.ensemble import RandomForestClassifier
 import sys
 import os
 
+from src.specific.dt.preprocess import DtPePreprocessorProvider
+
 # Add paths for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 sys.path.insert(0, os.path.join(current_dir, '..'))
-
-from specific.dt.preprocess.pe_dt_data_converter import DtPeDataConverter
-from specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
 
 class MalwareDetector:
     def __init__(self, model_path=None, scaler_path=None, transformer_path=None):
@@ -27,8 +26,7 @@ class MalwareDetector:
             if transformer_path and os.path.exists(transformer_path):
                 self.transformer = joblib.load(transformer_path)
             else:
-                converter = DtPeDataConverter()
-                self.transformer = DtPeDataTransformer(converter)
+                self.transformer = DtPePreprocessorProvider.get_transformer()
         else:
             # Create dummy model for development
             self.model = RandomForestClassifier(random_state=42)
