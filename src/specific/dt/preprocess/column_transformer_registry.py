@@ -1,96 +1,28 @@
-from src.specific.dt.preprocess.count_apis_column_transformer import CountApisColumnTransformer
-from src.specific.dt.preprocess.count_dlls_column_transformer import CountDllsColumnTransformer
-from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
-from src.specific.dt.preprocess.frequency_column_transformer import FrequencyColumnTransformer
-from src.specific.dt.preprocess.int8_column_transformer import Int8ColumnTransformer
-from src.specific.dt.preprocess.missing_column_transformer import MissingColumnTransformer
-from src.specific.dt.preprocess.ratio_column_transformer import RatioColumnTransformer
-from src.specific.dt.preprocess.category_column_transformer import CategoryColumnTransformer
-from src.specific.dt.preprocess.characteristics_column_transformer import CharacteristicsColumnTransformer
-from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
-from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
-from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
-from src.specific.dt.preprocess.imported_symbols_column_transformer import ImportedSymbolsColumnTransformer
+from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.specific.dt.preprocess.column_transformer_map_provider import ColumnTransformerMapProvider
 from src.specific.dt.preprocess.column_transformer import ColumnTransformer
-from src.specific.dt.preprocess.first_date_column_transformer import FirstDateColumnTransformer
-from src.specific.dt.preprocess.compile_time_column_transformer import CompileTimeColumnTransformer
-from src.specific.dt.preprocess.imported_dlls_column_transformer import ImportedDllsColumnTransformer
+
+"""
+Provide a ColumnTransformer instance for each supported csv input column name.
+
+In __init__, registry use ColumnTransformerMapProvider to create an Immutable dict between column and transformer.
+creates the relevant ColumnTransformer instances, and stores them in transformer_by_column by column name.
+
+The public methods then work only against transformer_by_column:
+- get(column_name): return the registered transformer for the column
+- contains(column_name): check whether a transformer exists for the column
+- columns(): return all registered column names
+"""
 
 
 # Registry that maps column names to ColumnTransformer instances.
 class ColumnTransformerRegistry:
 
-    NUMERIC_COLUMNS = ['Size', 'SizeOfImage', 'SizeOfUninitializedData', 'FileAlignment', 'ImageBase', 'BaseOfCode',
-                       'NumberOfSections', 'NumberOfRvaAndSizes']
-
     # Args: top identifiers, top imported DLLs and top imported DLLs. Used bit_count is when expanding bitmask fields.
-    def __init__(self, str_converter, list_converter, df_converter, args):
-        # str_converter
-        parse_listish = str_converter.parse_listish
-        clean_ident = str_converter.clean_ident
-
-        # list_converter
-        clean_dll = list_converter.clean_dlls
-        clean_api = list_converter.clean_apis
-
-        # df_converter
-        safe_num = df_converter.safe_num
-        dt_parts = df_converter.dt_parts
-        ratio = df_converter.ratio
-        expand_bits = df_converter.expand_bits
-        topk = df_converter.topk
-        parse_tds = df_converter.parse_tds
-        to_dt = df_converter.to_dt
-
-        self.transformer_by_column = {
-            'FirstSeenDate': FirstDateColumnTransformer(dt_parts, to_dt),
-            'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
-            'ImportedDlls': MultiColumnTransformer({
-                '{}': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, args.k_dlls),
-                'n_imported_dlls': CountDllsColumnTransformer(parse_listish, clean_dll)
-             }),
-            'ImportedSymbols': MultiColumnTransformer({
-                '{}': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, args.k_apis),
-                'n_imported_symbols': CountApisColumnTransformer(parse_listish, clean_api)
-            }),
-            'Identify': IdentifyColumnTransformer(topk, clean_ident, args.k_ident),
-            'Entropy': EntropyColumnTransformer(safe_num),
-            'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', args.bit_count),
-            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', args.bit_count),
-            'Machine': CategoryColumnTransformer(),
-            'PE_TYPE': CategoryColumnTransformer(),
-            'SizeOfCode': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                'ratio_Code_Image': RatioColumnTransformer(ratio, 'SizeOfCode', 'SizeOfImage')
-            }),
-            'SizeOfInitializedData': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                'ratio_InitData_Size': RatioColumnTransformer(ratio, 'SizeOfInitializedData', 'Size')
-            }),
-            'SizeOfHeaders': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                'ratio_Headers_Size': RatioColumnTransformer(ratio, 'SizeOfHeaders', 'Size')
-            }),
-            'BaseOfData': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                '{}_missing': MissingColumnTransformer()
-            }),
-            'PointerToSymbolTable': MultiColumnTransformer({
-                'has_symtab': Int8ColumnTransformer(safe_num),
-                '{}': NumberColumnTransformer(safe_num)
-            }),
-            'NumberOfSymbols': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                'symbols_nonzero': Int8ColumnTransformer(safe_num)
-            }),
-            'SizeOfOptionalHeader': MultiColumnTransformer({
-                '{}': NumberColumnTransformer(safe_num),
-                'optional_header_expected': FrequencyColumnTransformer(safe_num)
-            }),
-        }
-
-        for column in self.NUMERIC_COLUMNS:
-            self.transformer_by_column[column] = NumberColumnTransformer(safe_num)
+    def __init__(self, provider: ColumnTransformerMapProvider, args: DtPeDataPreprocessMapArgs):
+        self.transformer_by_column = dict()
+        self.transformer_by_column.update(provider.get_map_transformer_by_column(args))
+        self.transformer_by_column.update(provider.get_map_number_by_column())
 
     # Retrieve transformer for a column. KeyError if column not registered.
     def get(self, column_name: str) -> ColumnTransformer:

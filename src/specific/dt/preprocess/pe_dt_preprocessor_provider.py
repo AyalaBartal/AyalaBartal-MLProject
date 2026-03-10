@@ -1,3 +1,5 @@
+from src.specific.dt.preprocess.column_transformer_map_provider import ColumnTransformerMapProvider
+from src.specific.dt.preprocess.column_transformer_one_provider import ColumnTransformerOneProvider
 from src.specific.dt.preprocess.pe_dt_string_converter import DtPeStringConverter
 from src.specific.dt.preprocess.pe_dt_list_converter import DtPeListConverter
 from src.specific.dt.preprocess.pe_dt_data_frame_converter import DtPeDataFrameConverter
@@ -16,7 +18,9 @@ class DtPePreprocessorProvider:
         c_str = DtPeStringConverter()
         c_list = DtPeListConverter()
         c_df = DtPeDataFrameConverter()
-        registry = ColumnTransformerRegistry(c_str, c_list, c_df, args)
+        c_t_one_provider = ColumnTransformerOneProvider(c_str, c_list, c_df)
+        c_t_map_provider = ColumnTransformerMapProvider(c_t_one_provider)
+        registry = ColumnTransformerRegistry(c_t_map_provider, args)
         dt_pe_data_transformer = DtPeDataTransformer(registry)
         dt_pe_data_preprocessor = DtPePreprocessMapper(args, dt_pe_data_transformer)
         return dt_pe_data_preprocessor
@@ -27,5 +31,7 @@ class DtPePreprocessorProvider:
         c_str = DtPeStringConverter()
         c_list = DtPeListConverter()
         c_df = DtPeDataFrameConverter()
-        registry = ColumnTransformerRegistry(c_str, c_list, c_df, args)
+        c_t_one_provider = ColumnTransformerOneProvider(c_str, c_list, c_df)
+        c_t_map_provider = ColumnTransformerMapProvider(c_t_one_provider)
+        registry = ColumnTransformerRegistry(c_t_map_provider, args)
         return DtPeDataTransformer(registry)
