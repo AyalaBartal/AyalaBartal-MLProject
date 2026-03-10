@@ -24,36 +24,39 @@ class ColumnTransformerRegistry:
                        'NumberOfSections', 'NumberOfRvaAndSizes']
 
     # Args: top identifiers, top imported DLLs and top imported DLLs. Used bit_count is when expanding bitmask fields.
-    def __init__(self, converter, k_dlls, k_apis, k_ident, bit_count):
-        self.converter = converter
+    def __init__(self, str_converter, list_converter, df_converter, args):
+        # str_converter
+        parse_listish = str_converter.parse_listish
+        clean_ident = str_converter.clean_ident
 
-        safe_num = self.converter.safe_num
-        clean_dll = self.converter.clean_dll
-        clean_api = self.converter.clean_api
-        dt_parts = self.converter.dt_parts
-        ratio = self.converter.ratio
-        parse_listish = self.converter.parse_listish
-        expand_bits = self.converter.expand_bits
-        topk = self.converter.topk
-        clean_ident = self.converter.clean_ident
-        parse_tds = self.converter.parse_tds
-        to_dt = self.converter.to_dt
+        # list_converter
+        clean_dll = list_converter.clean_dlls
+        clean_api = list_converter.clean_apis
+
+        # df_converter
+        safe_num = df_converter.safe_num
+        dt_parts = df_converter.dt_parts
+        ratio = df_converter.ratio
+        expand_bits = df_converter.expand_bits
+        topk = df_converter.topk
+        parse_tds = df_converter.parse_tds
+        to_dt = df_converter.to_dt
 
         self.transformer_by_column = {
             'FirstSeenDate': FirstDateColumnTransformer(dt_parts, to_dt),
             'TimeDateStamp': CompileTimeColumnTransformer(parse_tds, dt_parts),
             'ImportedDlls': MultiColumnTransformer({
-                '{}': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, k_dlls),
+                '{}': ImportedDllsColumnTransformer(parse_listish, clean_dll, topk, args.k_dlls),
                 'n_imported_dlls': CountDllsColumnTransformer(parse_listish, clean_dll)
              }),
             'ImportedSymbols': MultiColumnTransformer({
-                '{}': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, k_apis),
+                '{}': ImportedSymbolsColumnTransformer(parse_listish, clean_api, topk, args.k_apis),
                 'n_imported_symbols': CountApisColumnTransformer(parse_listish, clean_api)
             }),
-            'Identify': IdentifyColumnTransformer(topk, clean_ident, k_ident),
+            'Identify': IdentifyColumnTransformer(topk, clean_ident, args.k_ident),
             'Entropy': EntropyColumnTransformer(safe_num),
-            'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', bit_count),
-            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', bit_count),
+            'Characteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'char', args.bit_count),
+            'DllCharacteristics': CharacteristicsColumnTransformer(expand_bits, safe_num, 'dllc', args.bit_count),
             'Machine': CategoryColumnTransformer(),
             'PE_TYPE': CategoryColumnTransformer(),
             'SizeOfCode': MultiColumnTransformer({
