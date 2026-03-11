@@ -13,7 +13,7 @@ class ImportedSymbolsColumnTransformer(ColumnTransformer):
         self.clean_api = clean_api
         # topk: converts a text column into numeric ML features using the top K most common words.
         self.topk = topk
-        # Number of top dlls to select
+        # Number of top APIs/symbols to select
         self.k_top = k_apis
 
     def valid_transform(self, data: pd.DataFrame, column_name: str) -> List[pd.DataFrame]:
