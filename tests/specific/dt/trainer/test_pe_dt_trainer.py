@@ -2,16 +2,9 @@ import unittest
 import os
 import time
 
-from src.specific.dt.trainer.pe_dt_report_trainer import DtPeReportTrainer
-from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
-from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
-from src.specific.dt.trainer.pe_dt_logic_trainer import DtPeLogicTrainer
+from src.specific.dt.trainer.pe_dt_trainer_provider import DtPeTrainerProvider
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
-from src.specific.dt.trainer.pe_dt_io_trainer import DtPeIoTrainer
-from src.specific.dt.trainer.pe_dt_train_writer import DtPeTrainWriter
-from src.specific.dt.trainer.pe_dt_train_output_mapper import DtPeTrainOutputMapper
-from src.specific.dt.trainer.pe_dt_train_output_writer import DtPeTrainOutputWriter
 from tests.utils import PathsProvider
 
 
@@ -32,14 +25,7 @@ class TestPeDtPreprocessor(unittest.TestCase):
         print(f"\n{self.id()} took {duration:.4f} seconds")
 
     def test_validate_header_of_input_csv_success(self):
-        alog_args = DtPeTrainAlgoArgs()
+        algo_args = DtPeTrainAlgoArgs()
         report_args = DtPeTrainReportArgs(self.input_file, self.out_dir)
-        model_trainer = DtPeModelTrainer()
-        data_trainer = DtPeDataTrainer()
-        report_trainer = DtPeReportTrainer(data_trainer, model_trainer)
-        logic_trainer = DtPeLogicTrainer(data_trainer, model_trainer, report_trainer)
-        dt_output_mapper = DtPeTrainOutputMapper()
-        output_writer = DtPeTrainOutputWriter()
-        dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
-        io_trainer = DtPeIoTrainer(data_trainer, logic_trainer, dt_writer)
-        io_trainer.train(alog_args, report_args)
+        io_trainer = DtPeTrainerProvider.get_io_trainer()
+        io_trainer.train(algo_args, report_args)
