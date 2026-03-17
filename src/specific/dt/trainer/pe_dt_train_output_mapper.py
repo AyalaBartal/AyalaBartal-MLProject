@@ -6,7 +6,8 @@ from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 
 class DtPeTrainOutputMapper:
 
-    def get_end_message(self, args: DtPeTrainArgs, result: DtPeTrainResult):
+    def get_end_message(self, result: DtPeTrainResult):
+        args = result.input_args
         parts = [
             "# Decision Tree — Cross-Validation",
             "",

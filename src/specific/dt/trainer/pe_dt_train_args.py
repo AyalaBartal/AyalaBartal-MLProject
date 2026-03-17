@@ -14,6 +14,8 @@ class DtPeTrainArgs:
         self.feature_importance_csv = os.path.join(out_report_dir, 'feature_importance.csv')
 
         self.label = 'Label'
+
+        # criterion="gini" specifies how a DecisionTreeClassifier measures the quality of a split at each node.
         self.criterion = 'gini'
 
         self.n_splits = 3

@@ -5,13 +5,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import confusion_matrix
 
+from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_args import DtPeTrainArgs
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 
 
 class DtPeDataTrainer:
 
-    def train(self, args: DtPeTrainArgs, data: DataFrame):
+    def train(self, args: DtPeTrainAlgoArgs, data: DataFrame):
         # (1) Validate input
         self.validate_train_input(args, data)
 
@@ -37,8 +38,8 @@ class DtPeDataTrainer:
     def validate_train_input(self, args, data):
         if args is None:
             raise ValueError("args cannot be None")
-        if not isinstance(args, DtPeTrainArgs):
-            raise TypeError("args must be instance of DtPeTrainArgs")
+        if not isinstance(args, DtPeTrainAlgoArgs):
+            raise TypeError("args must be instance of DtPeTrainAlgoArgs")
         if data is None:
             raise ValueError("data cannot be None")
         if not isinstance(data, DataFrame):

@@ -1,4 +1,5 @@
-from .pe_dt_train_args import DtPeTrainArgs
+from .pe_dt_train_algo_args import DtPeTrainAlgoArgs
+from .pe_dt_train_report_args import DtPeTrainReportArgs
 from .pe_dt_trainer import DtPeDataTrainer
 from .pe_dt_io_trainer import DtPeIoTrainer
 from .pe_dt_train_result import DtPeTrainResult
