@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-
 from pandas import DataFrame
-from sklearn.metrics import confusion_matrix
 
+from src.specific.dt.trainer import DtPeReportTrainer
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
-from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 
 
 class DtPeLogicTrainer:
 
-    def __init__(self, reader: DtPeDataTrainer, trainer: DtPeModelTrainer):
+    def __init__(self, reader: DtPeDataTrainer, trainer: DtPeModelTrainer, reporter: DtPeReportTrainer):
         self.data_reader = reader
         self.trainer = trainer
+        self.reporter = reporter
 
     # Typical ML algorithm model builder workflow:
     # 1 Evaluate model with cross-validation methods: acc and auc.
@@ -31,9 +30,8 @@ class DtPeLogicTrainer:
         scores = self.trainer.get_cross_validate_score(model, skf, ml_features, ml_label)
         model = self.trainer.fit_model(model, ml_features, ml_label)
 
-        con_matrix = self.calc_confusion_matrix(ml_features, ml_label, model, skf)
-
-        return DtPeTrainResult(args, ml_features, model, scores['test_accuracy'], scores['test_roc_auc'], con_matrix)
+        con_matrix = self.reporter.get_confusion_matrix(model, skf, ml_features, ml_label)
+        return self.reporter.get_report(args, ml_features, model, con_matrix, scores)
 
     def validate_train_input(self, args, data):
         if args is None:
@@ -44,17 +42,3 @@ class DtPeLogicTrainer:
             raise ValueError("data cannot be None")
         if not isinstance(data, DataFrame):
             raise TypeError("data must be instance of DataFrame")
-
-    def calc_confusion_matrix(self, x, y, model, skf):
-        all_true = []
-        all_pred = []
-        for train_idx, test_idx in skf.split(x, y):
-            X_train, X_test = x.iloc[train_idx], x.iloc[test_idx]
-            y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
-
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
-
-            all_true.extend(y_test)
-            all_pred.extend(y_pred)
-        return confusion_matrix(all_true, all_pred)

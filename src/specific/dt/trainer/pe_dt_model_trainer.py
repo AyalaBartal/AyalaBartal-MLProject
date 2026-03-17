@@ -1,3 +1,4 @@
+from sklearn.metrics import confusion_matrix
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, cross_validate
 
@@ -22,3 +23,7 @@ class DtPeModelTrainer:
     # Build a decision tree classifier from the training set (ml_features, ml_label).
     def fit_model(self, model, ml_features, ml_label):
         return model.fit(ml_features, ml_label)
+
+    # Build confusion matrix using sklearn.metrics.confusion_matrix.
+    def build(self, y_true, y_pred):
+        return confusion_matrix(y_true, y_pred)

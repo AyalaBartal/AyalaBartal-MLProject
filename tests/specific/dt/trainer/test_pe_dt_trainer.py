@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 
+from src.specific.dt.trainer.pe_dt_report_trainer import DtPeReportTrainer
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_logic_trainer import DtPeLogicTrainer
@@ -35,7 +36,8 @@ class TestPeDtPreprocessor(unittest.TestCase):
         report_args = DtPeTrainReportArgs(self.input_file, self.out_dir)
         model_trainer = DtPeModelTrainer()
         data_trainer = DtPeDataTrainer()
-        logic_trainer = DtPeLogicTrainer(data_trainer, model_trainer)
+        report_trainer = DtPeReportTrainer(data_trainer, model_trainer)
+        logic_trainer = DtPeLogicTrainer(data_trainer, model_trainer, report_trainer)
         dt_output_mapper = DtPeTrainOutputMapper()
         output_writer = DtPeTrainOutputWriter()
         dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
