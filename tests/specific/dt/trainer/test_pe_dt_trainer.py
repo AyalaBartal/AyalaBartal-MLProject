@@ -2,14 +2,15 @@ import unittest
 import os
 import time
 
-from src.specific.dt.trainer import DtPeModelTrainer
+from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
+from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
+from src.specific.dt.trainer.pe_dt_logic_trainer import DtPeLogicTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
 from src.specific.dt.trainer.pe_dt_io_trainer import DtPeIoTrainer
 from src.specific.dt.trainer.pe_dt_train_writer import DtPeTrainWriter
 from src.specific.dt.trainer.pe_dt_train_output_mapper import DtPeTrainOutputMapper
 from src.specific.dt.trainer.pe_dt_train_output_writer import DtPeTrainOutputWriter
-from src.specific.dt.trainer.pe_dt_trainer import DtPeDataTrainer
 from tests.utils import PathsProvider
 
 
@@ -33,9 +34,10 @@ class TestPeDtPreprocessor(unittest.TestCase):
         alog_args = DtPeTrainAlgoArgs()
         report_args = DtPeTrainReportArgs(self.input_file, self.out_dir)
         model_trainer = DtPeModelTrainer()
-        data_trainer = DtPeDataTrainer(model_trainer)
+        data_trainer = DtPeDataTrainer()
+        logic_trainer = DtPeLogicTrainer(data_trainer, model_trainer)
         dt_output_mapper = DtPeTrainOutputMapper()
         output_writer = DtPeTrainOutputWriter()
         dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
-        io_trainer = DtPeIoTrainer(data_trainer, dt_writer)
+        io_trainer = DtPeIoTrainer(logic_trainer, dt_writer)
         io_trainer.train(alog_args, report_args)

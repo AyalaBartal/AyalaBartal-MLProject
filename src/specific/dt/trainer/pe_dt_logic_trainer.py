@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+from pandas import DataFrame
+from sklearn.metrics import confusion_matrix
+
+from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
+from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
+from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
+from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
+
+
+class DtPeLogicTrainer:
+
+    def __init__(self, reader: DtPeDataTrainer, trainer: DtPeModelTrainer):
+        self.data_reader = reader
+        self.trainer = trainer
+
+    # Typical ML algorithm model builder workflow:
+    # 1 Evaluate model with cross-validation methods: acc and auc.
+    # 2 Choose best parameters for decision tree based on step 1 result.
+    # 3 Train final model on full dataset.
+    # 4 Run model on full data and build confusion matrix and report.
+    def train(self, args: DtPeTrainAlgoArgs, data: DataFrame):
+        self.validate_train_input(args, data)
+
+        ml_label = self.data_reader.get_label_as_series(data, args.label)
+        ml_features = self.data_reader.get_features_data_frame(data, args.label)
+
+        model = self.trainer.get_decision_tree_classifier(args)
+        skf = self.trainer.get_split_train_test(args)
+        scores = self.trainer.get_cross_validate_score(model, skf, ml_features, ml_label)
+        model = self.trainer.fit_model(model, ml_features, ml_label)
+
+        con_matrix = self.calc_confusion_matrix(ml_features, ml_label, model, skf)
+
+        return DtPeTrainResult(args, ml_features, model, scores['test_accuracy'], scores['test_roc_auc'], con_matrix)
+
+    def validate_train_input(self, args, data):
+        if args is None:
+            raise ValueError("args cannot be None")
+        if not isinstance(args, DtPeTrainAlgoArgs):
+            raise TypeError("args must be instance of DtPeTrainAlgoArgs")
+        if data is None:
+            raise ValueError("data cannot be None")
+        if not isinstance(data, DataFrame):
+            raise TypeError("data must be instance of DataFrame")
+
+    def calc_confusion_matrix(self, x, y, model, skf):
+        all_true = []
+        all_pred = []
+        for train_idx, test_idx in skf.split(x, y):
+            X_train, X_test = x.iloc[train_idx], x.iloc[test_idx]
+            y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+
+            all_true.extend(y_test)
+            all_pred.extend(y_pred)
+        return confusion_matrix(all_true, all_pred)
