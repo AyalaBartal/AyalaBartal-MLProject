@@ -1,12 +1,14 @@
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
-
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
+from src.specific.dt.trainer.args_validator import ArgsValidator
 
 
 class DtPeReportTrainer:
 
     def __init__(self, row_selector: DtPeDataTrainer, matrix_builder: DtPeModelTrainer):
+        ArgsValidator.require_type_not_none(row_selector, DtPeDataTrainer, "row_selector")
+        ArgsValidator.require_type_not_none(matrix_builder, DtPeModelTrainer, "matrix_builder")
         self.row_selector = row_selector
         self.matrix_builder = matrix_builder
 

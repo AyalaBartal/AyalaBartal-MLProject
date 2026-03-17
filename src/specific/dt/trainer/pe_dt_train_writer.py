@@ -1,4 +1,5 @@
-from src.specific.dt.trainer import DtPeTrainReportArgs
+from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
+from src.specific.dt.trainer.args_validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_train_output_mapper import DtPeTrainOutputMapper
 from src.specific.dt.trainer.pe_dt_train_output_writer import DtPeTrainOutputWriter
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
@@ -7,6 +8,8 @@ from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 class DtPeTrainWriter:
 
     def __init__(self, mapper: DtPeTrainOutputMapper, writer: DtPeTrainOutputWriter):
+        ArgsValidator.require_type_not_none(mapper, DtPeTrainOutputMapper, "mapper")
+        ArgsValidator.require_type_not_none(writer, DtPeTrainOutputWriter, "writer")
         self.mapper = mapper
         self.writer = writer
 

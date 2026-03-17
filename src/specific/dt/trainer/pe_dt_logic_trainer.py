@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from pandas import DataFrame
 
-from src.specific.dt.trainer import DtPeReportTrainer
+from src.specific.dt.trainer.args_validator import ArgsValidator
+from src.specific.dt.trainer.pe_dt_report_trainer import DtPeReportTrainer
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
@@ -10,6 +11,9 @@ from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 class DtPeLogicTrainer:
 
     def __init__(self, reader: DtPeDataTrainer, trainer: DtPeModelTrainer, reporter: DtPeReportTrainer):
+        ArgsValidator.require_type_not_none(reader, DtPeDataTrainer, "reader")
+        ArgsValidator.require_type_not_none(trainer, DtPeModelTrainer, "trainer")
+        ArgsValidator.require_type_not_none(reporter, DtPeReportTrainer, "reporter")
         self.data_reader = reader
         self.trainer = trainer
         self.reporter = reporter
@@ -20,8 +24,6 @@ class DtPeLogicTrainer:
     # 3 Train final model on full dataset.
     # 4 Run model on full data and build confusion matrix and report.
     def train(self, args: DtPeTrainAlgoArgs, data: DataFrame):
-        self.validate_train_input(args, data)
-
         ml_label = self.data_reader.get_label_as_series(data, args.label)
         ml_features = self.data_reader.get_features_data_frame(data, args.label)
 
@@ -33,12 +35,3 @@ class DtPeLogicTrainer:
         con_matrix = self.reporter.get_confusion_matrix(model, skf, ml_features, ml_label)
         return self.reporter.get_report(args, ml_features, model, con_matrix, scores)
 
-    def validate_train_input(self, args, data):
-        if args is None:
-            raise ValueError("args cannot be None")
-        if not isinstance(args, DtPeTrainAlgoArgs):
-            raise TypeError("args must be instance of DtPeTrainAlgoArgs")
-        if data is None:
-            raise ValueError("data cannot be None")
-        if not isinstance(data, DataFrame):
-            raise TypeError("data must be instance of DataFrame")
