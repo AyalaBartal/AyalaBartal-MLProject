@@ -1,4 +1,10 @@
+import pandas as pd
+
+
 class DtPeDataTrainer:
+
+    def read_csv_to_df(self, report_args):
+        return pd.read_csv(report_args.input_csv)
 
     def get_features_data_frame(self, data, label_name):
         return data.drop(columns=[label_name])

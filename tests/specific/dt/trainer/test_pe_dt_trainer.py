@@ -41,5 +41,5 @@ class TestPeDtPreprocessor(unittest.TestCase):
         dt_output_mapper = DtPeTrainOutputMapper()
         output_writer = DtPeTrainOutputWriter()
         dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
-        io_trainer = DtPeIoTrainer(logic_trainer, dt_writer)
+        io_trainer = DtPeIoTrainer(data_trainer, logic_trainer, dt_writer)
         io_trainer.train(alog_args, report_args)
