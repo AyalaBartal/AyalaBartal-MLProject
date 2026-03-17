@@ -3,20 +3,20 @@ import json, os
 
 import joblib
 import numpy as np, pandas as pd
+from pandas import DataFrame
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import confusion_matrix
 from joblib import dump
 
+from src.specific.dt.trainer import DtPeTrainArgs
+
+
 class DtPeDataTrainer:
 
-
-    def train(self, args):
-        # (1) Read csv input
-        self.make_output_dirs(args.out_model, args.out_report_json)
-        data = pd.read_csv(args.input_csv)
-        ml_label = data[args.label]  # Series
-        ml_features = data.drop(columns=[args.label])
+    def train(self, args: DtPeTrainArgs, data: DataFrame):
+        # (1) Validate input
+        self.validate_train_input(args, data)
 
         # (2) A decision tree classifier
         model = self.get_decision_tree_classifier(args)
@@ -24,6 +24,8 @@ class DtPeDataTrainer:
         skf = StratifiedKFold(n_splits=args.n_splits, shuffle=True, random_state=args.random_state)
 
         # (3) Evaluate a score by cross-validation.
+        ml_label = data[args.label]  # Series
+        ml_features = data.drop(columns=[args.label])
         auc = cross_val_score(model, ml_features, ml_label, cv=skf, scoring='roc_auc', n_jobs=-1)
         acc = cross_val_score(model, ml_features, ml_label, cv=skf, scoring='accuracy', n_jobs=-1)
 
@@ -34,6 +36,16 @@ class DtPeDataTrainer:
 
         # (5) Write results into output files
         self.write_output(args, ml_features, model, acc, auc, con_matrix)
+
+    def validate_train_input(self, args, data):
+        if args is None:
+            raise ValueError("args cannot be None")
+        if not isinstance(args, DtPeTrainArgs):
+            raise TypeError("args must be instance of DtPeTrainArgs")
+        if data is None:
+            raise ValueError("data cannot be None")
+        if not isinstance(data, DataFrame):
+            raise TypeError("data must be instance of DataFrame")
 
     def write_output(self, args, ml_features, model, acc, auc, cm):
         md = self.get_message(args, ml_features, auc, acc)
@@ -101,11 +113,6 @@ class DtPeDataTrainer:
                                       min_samples_leaf=args.min_samples_leaf,
                                       class_weight='balanced',
                                       random_state=args.random_state)
-
-
-    def make_output_dirs(self, out_model, out_report_json):
-        os.makedirs(os.path.dirname(out_model), exist_ok=True)
-        os.makedirs(os.path.dirname(out_report_json), exist_ok=True)
 
     def calc_confusion_matrix(self, x, y, model, skf):
         all_true = []
