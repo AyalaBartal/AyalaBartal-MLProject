@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 
-from src.specific.dt.trainer import DtPeIoTrainer
+from src.specific.dt.trainer import DtPeIoTrainer, DtPeTrainWriter, DtPeTrainOutputMapper, DtPeTrainOutputWriter
 from src.specific.dt.trainer.pe_dt_train_args import DtPeTrainArgs
 from src.specific.dt.trainer.pe_dt_trainer import DtPeDataTrainer
 from tests.utils import PathsProvider
@@ -28,5 +28,8 @@ class TestPeDtPreprocessor(unittest.TestCase):
     def test_validate_header_of_input_csv_success(self):
         args = DtPeTrainArgs(self.input_file, self.out_report, self.out_model)
         data_trainer = DtPeDataTrainer()
-        io_trainer = DtPeIoTrainer(data_trainer)
+        dt_output_mapper = DtPeTrainOutputMapper()
+        output_writer = DtPeTrainOutputWriter()
+        dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
+        io_trainer = DtPeIoTrainer(data_trainer, dt_writer)
         io_trainer.train(args)
