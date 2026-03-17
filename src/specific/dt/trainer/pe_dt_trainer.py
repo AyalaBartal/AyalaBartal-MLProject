@@ -9,7 +9,8 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import confusion_matrix
 from joblib import dump
 
-from src.specific.dt.trainer import DtPeTrainArgs
+from src.specific.dt.trainer.pe_dt_train_args import DtPeTrainArgs
+from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 
 
 class DtPeDataTrainer:
@@ -34,8 +35,10 @@ class DtPeDataTrainer:
 
         con_matrix = self.calc_confusion_matrix(ml_features, ml_label, model, skf)
 
+        result = DtPeTrainResult(args, ml_features, model, acc, auc, con_matrix)
+
         # (5) Write results into output files
-        self.write_output(args, ml_features, model, acc, auc, con_matrix)
+        self.write_output(result)
 
     def validate_train_input(self, args, data):
         if args is None:
@@ -47,18 +50,20 @@ class DtPeDataTrainer:
         if not isinstance(data, DataFrame):
             raise TypeError("data must be instance of DataFrame")
 
-    def write_output(self, args, ml_features, model, acc, auc, cm):
-        md = self.get_message(args, ml_features, auc, acc)
+    def write_output(self, result: DtPeTrainResult):
+        args = result.input_args
+        md = self.get_message(args, result.input_features, result.acc_score, result.auc_score)
         print(md)
 
-        dump(model, args.out_model)
+        dump(result.dt_model, args.out_model)
 
         # Save schema JSON
         with open(args.out_schema_json, 'w', encoding='utf-8') as f:
-            json.dump({'feature_order': list(ml_features.columns)}, f)
+            json.dump({'feature_order': list(result.input_features.columns)}, f)
 
         # Save report JSON
-        rep = self.get_report(acc, args, auc, ml_features, cm)
+        # get_report(self, args, ml_features, acc, auc, cm):
+        rep = self.get_report(args, result.input_features, result.acc_score, result.auc_score, result.confusion_matrix)
         with open(args.out_report_json, 'w', encoding='utf-8') as f:
             json.dump(rep, f, indent=2)
 
@@ -66,16 +71,16 @@ class DtPeDataTrainer:
         with open(args.out_report_md, 'w', encoding='utf-8') as f:
             f.write(md)
 
-        joblib.dump(model, args.out_model_joblib)
+        joblib.dump(result.dt_model, args.out_model_joblib)
 
         # Optional: export tree visualization (.dot)
         model_output_dot = args.model_output_dot
-        feature_names = ml_features.columns.tolist()
+        feature_names = result.input_features.columns.tolist()
         export_graphviz(
-            model,
+            result.dt_model,
             out_file=str(model_output_dot),
             feature_names=feature_names,
-            class_names=[str(c) for c in model.classes_],
+            class_names=[str(c) for c in result.dt_model.classes_],
             filled=True,
             rounded=True
         )
@@ -85,12 +90,12 @@ class DtPeDataTrainer:
         # --------------------
         feature_importance = pd.DataFrame({
             "feature": feature_names,
-            "importance": model.feature_importances_
+            "importance": result.dt_model.feature_importances_
         }).sort_values(by="importance", ascending=False)
         feature_importance.to_csv(args.feature_importance_csv, index=False)
 
 
-    def get_report(self, acc, args, auc, ml_features, cm):
+    def get_report(self, args, ml_features, acc, auc, cm):
         return {
             'cv_splits': args.n_splits,
             'cm': cm.tolist(),
@@ -103,7 +108,7 @@ class DtPeDataTrainer:
         }
 
 
-    def get_message(self,args, ml_features, auc, acc):
+    def get_message(self,args, ml_features, acc, auc):
         return f"""# Decision Tree — Cross-Validation\n\n- Splits: {args.n_splits}\n- AUC (mean ± std): {np.mean(auc):.4f} ± {np.std(auc, ddof=1):.4f}\n- Accuracy (mean ± std): {np.mean(acc):.4f} ± {np.std(acc, ddof=1):.4f}\n- Samples: {ml_features.shape[0]}, Features: {ml_features.shape[1]}\n- Model: criterion={args.criterion}, max_depth={args.max_depth}, min_samples_leaf={args.min_samples_leaf}\n"""
 
 
