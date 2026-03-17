@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
 
 from pandas import DataFrame
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import confusion_matrix
 
+from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
-from src.specific.dt.trainer.pe_dt_train_args import DtPeTrainArgs
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 
 
 class DtPeDataTrainer:
 
+    def __init__(self, trainer: DtPeModelTrainer):
+        self.trainer = trainer
+
+    # Typical ML algorithm model builder workflow:
+    # 1 Evaluate model with cross-validation methods: acc and auc.
+    # 2 Choose best parameters for decision tree based on step 1 result.
+    # 3 Train final model on full dataset.
+    # 4 Run model on full data and build confusion matrix and report.
     def train(self, args: DtPeTrainAlgoArgs, data: DataFrame):
-        # (1) Validate input
         self.validate_train_input(args, data)
 
-        # (2) A decision tree classifier
-        model = self.get_decision_tree_classifier(args)
-        # Provides train/test indices to split data in train/test sets
-        skf = StratifiedKFold(n_splits=args.n_splits, shuffle=True, random_state=args.random_state)
-
-        # (3) Evaluate a score by cross-validation.
         ml_label = data[args.label]  # Series
         ml_features = data.drop(columns=[args.label])
-        auc = cross_val_score(model, ml_features, ml_label, cv=skf, scoring='roc_auc', n_jobs=-1)
-        acc = cross_val_score(model, ml_features, ml_label, cv=skf, scoring='accuracy', n_jobs=-1)
 
-        # (4) Build a decision tree classifier from the training set (ml_features, ml_label).
-        model.fit(ml_features, ml_label)
+        model = self.trainer.get_decision_tree_classifier(args)
+        skf = self.trainer.get_split_train_test(args)
+        scores = self.trainer.get_cross_validate_score(model, skf, ml_features, ml_label)
+        model = self.trainer.fit_model(model, ml_features, ml_label)
 
         con_matrix = self.calc_confusion_matrix(ml_features, ml_label, model, skf)
 
-        return DtPeTrainResult(args, ml_features, model, acc, auc, con_matrix)
+        return DtPeTrainResult(args, ml_features, model, scores['test_accuracy'], scores['test_roc_auc'], con_matrix)
+
 
 
     def validate_train_input(self, args, data):
@@ -44,13 +44,6 @@ class DtPeDataTrainer:
             raise ValueError("data cannot be None")
         if not isinstance(data, DataFrame):
             raise TypeError("data must be instance of DataFrame")
-
-    def get_decision_tree_classifier(self, args):
-        return DecisionTreeClassifier(criterion=args.criterion,
-                                      max_depth=args.max_depth,
-                                      min_samples_leaf=args.min_samples_leaf,
-                                      class_weight='balanced',
-                                      random_state=args.random_state)
 
     def calc_confusion_matrix(self, x, y, model, skf):
         all_true = []

@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 
+from src.specific.dt.trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
 from src.specific.dt.trainer.pe_dt_io_trainer import DtPeIoTrainer
@@ -31,7 +32,8 @@ class TestPeDtPreprocessor(unittest.TestCase):
     def test_validate_header_of_input_csv_success(self):
         alog_args = DtPeTrainAlgoArgs()
         report_args = DtPeTrainReportArgs(self.input_file, self.out_dir)
-        data_trainer = DtPeDataTrainer()
+        model_trainer = DtPeModelTrainer()
+        data_trainer = DtPeDataTrainer(model_trainer)
         dt_output_mapper = DtPeTrainOutputMapper()
         output_writer = DtPeTrainOutputWriter()
         dt_writer = DtPeTrainWriter(dt_output_mapper, output_writer)
