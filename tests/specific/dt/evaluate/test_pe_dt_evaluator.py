@@ -3,9 +3,11 @@ import os
 import time
 
 from src.specific.dt.evaluate import DtPeDataEvaluator
+from src.specific.dt.evaluate.file_util import FileUtil
 from src.specific.dt.evaluate.pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
+from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
 
 from tests.utils import PathsProvider
 
@@ -29,5 +31,9 @@ class TestDtPeDataEvaluator(unittest.TestCase):
         input_args = DtPeEvaluateInputArgs(self.input_dir)
         algo_args = DtPeEvaluateAlgoArgs()
         output_args = DtPeEvaluateOutputArgs(self.output_dir)
-        evaluator = DtPeDataEvaluator()
+
+        dir_validator = FileUtil()
+        reader = DtPeEvaluatorReader(dir_validator)
+
+        evaluator = DtPeDataEvaluator(reader)
         evaluator.evaluate(input_args, algo_args, output_args)

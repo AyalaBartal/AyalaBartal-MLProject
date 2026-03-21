@@ -1,7 +1,5 @@
-import pandas as pd
-import json, os
+import json
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
-from joblib import load
 
 from src.common.image.file_io_validator import FileIoValidator
 from src.common.plot import MlIoPlotWriter, MatplotlibPlotExporter
@@ -9,24 +7,25 @@ from src.common.plot.confusion_matrix_spec_factory import ConfusionMatrixPlotSpe
 from src.common.plot.matplotlib_plot_renderer import MatplotlibPlotRenderer
 from src.specific.dt.evaluate import DtPeEvaluateInputArgs, DtPeEvaluateOutputArgs, DtPeEvaluateAlgoArgs, \
     DtPeEvaluateReport
-from src.specific.dt.evaluate.file_util import FileUtil
+from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
 
 
 class DtPeDataEvaluator:
 
+    def __init__(self, reader: DtPeEvaluatorReader):
+        self.reader = reader
+
     def evaluate(self, args_in: DtPeEvaluateInputArgs, args_al: DtPeEvaluateAlgoArgs, args_out: DtPeEvaluateOutputArgs):
 
         print("Start DtPeDataEvaluator")
-        os.makedirs(args_out.output_dir, exist_ok=True)
-        FileUtil.is_readable_directory(args_in.input_dir, True, False)
-        FileUtil.is_readable_directory(args_out.output_dir, True, True)
+        self.reader.validate_input(args_in)
+        self.reader.validate_output(args_out)
 
-        df = pd.read_csv(args_in.input_csv)
-        model = load(args_in.input_model)
+        df = self.reader.read_csv_to_df(args_in.input_csv)
+        model = self.reader.read_dt_model_from_joblib_file(args_in)
 
-        column_label = args_al.column_label
-        y = df[column_label].values
-        x = df.drop(columns=[column_label])
+        y = df[args_al.column_label].values
+        x = df.drop(columns=[args_al.column_label])
 
         proba = DtPeDataEvaluator.get_proba(model, x)
         y_pred = self.calc_pred(args_al, proba)
@@ -39,6 +38,8 @@ class DtPeDataEvaluator:
         plot_writer.create_plot(args_out.out_png, report.cm)
 
         print("End DtPeDataEvaluator")
+
+
 
     def get_plot_writer(self):
         file_validator = FileIoValidator()
