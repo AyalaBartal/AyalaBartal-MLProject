@@ -1,5 +1,3 @@
-import pandas as pd
-
 from src.specific.dt.trainer import DtPeDataTrainer
 from src.specific.dt.trainer.args_validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
