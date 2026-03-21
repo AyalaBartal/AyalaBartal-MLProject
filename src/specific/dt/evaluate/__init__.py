@@ -13,3 +13,4 @@ from .pe_dt_file_writer import FileWriter
 
 
 from .pe_dt_evaluator import DtPeDataEvaluator
+from .pe_dt_evaluator_provider import DtPeEvaluatorProvider
