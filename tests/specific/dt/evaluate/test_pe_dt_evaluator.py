@@ -2,7 +2,11 @@ import unittest
 import os
 import time
 
-from src.specific.dt.evaluate import DtPeEvaluateArgs, DtPeDataEvaluator
+from src.specific.dt.evaluate import DtPeDataEvaluator
+from src.specific.dt.evaluate.pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
+from src.specific.dt.evaluate.pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
+from src.specific.dt.evaluate.pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
+
 from tests.utils import PathsProvider
 
 
@@ -22,6 +26,8 @@ class TestDtPeDataEvaluator(unittest.TestCase):
         print(f"\n{self.id()} took {duration:.4f} seconds")
 
     def test_evaluate_dt_model_success(self):
-        args = DtPeEvaluateArgs(self.input_dir, self.output_dir)
+        input_args = DtPeEvaluateInputArgs(self.input_dir)
+        algo_args = DtPeEvaluateAlgoArgs()
+        output_args = DtPeEvaluateOutputArgs(self.output_dir)
         evaluator = DtPeDataEvaluator()
-        evaluator.evaluate(args)
+        evaluator.evaluate(input_args, algo_args, output_args)
