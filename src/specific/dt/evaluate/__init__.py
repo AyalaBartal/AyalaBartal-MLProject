@@ -1,5 +1,6 @@
 from .pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
 from .pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
 from .pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
+from .pe_dt_evaluate_report import DtPeEvaluateReport
 
 from .pe_dt_evaluator import DtPeDataEvaluator
