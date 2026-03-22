@@ -6,7 +6,7 @@ class FileUtil:
 
     @staticmethod
     # Checks if the given path is an existing, readable directory, and not a file.
-    def is_readable_directory(input_dir: str, is_read, is_write):
+    def validate_directory(input_dir: str, is_read, is_write):
         if not Path(input_dir).exists():
             raise FileNotFoundError('Not found file: {}'.format(input_dir))
         if not os.path.isdir(input_dir):

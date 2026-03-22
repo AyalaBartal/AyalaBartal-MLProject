@@ -1,73 +1,40 @@
-import pandas as pd
-import json, os
-from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
-from joblib import load
+from src.specific.dt.evaluate.pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
+from src.specific.dt.evaluate.pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
+from src.specific.dt.evaluate.pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
 
-from src.common.image.file_io_validator import FileIoValidator
-from src.common.plot import MlIoPlotWriter
-from src.common.plot.confusion_matrix_spec_factory import ConfusionMatrixPlotSpecFactory
-from src.common.plot.matplotlib_plot_renderer import MatplotlibPlotRenderer
-from src.specific.dt.evaluate.file_util import FileUtil
+from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
+from src.specific.dt.evaluate.pe_dt_evaluator_calculator import DtPeEvaluatorCalculator
+from src.specific.dt.evaluate.pe_dt_evaluator_writer import DtPeEvaluatorWriter
 
 
 class DtPeDataEvaluator:
 
-    def evaluate(self, args):
-        print("Start DtPeDataEvaluator")
-        os.makedirs(args.output_dir, exist_ok=True)
-        FileUtil.is_readable_directory(args.input_dir, True, False)
-        FileUtil.is_readable_directory(args.output_dir, True, True)
+    def __init__(self, reader: DtPeEvaluatorReader, calculator: DtPeEvaluatorCalculator, writer: DtPeEvaluatorWriter):
+        self.reader = reader
+        self.calculator = calculator
+        self.writer = writer
 
-        df = pd.read_csv(args.input_csv)
-        model = load(args.input_model)
+    def evaluate(self, args_in: DtPeEvaluateInputArgs, args_al: DtPeEvaluateAlgoArgs, args_out: DtPeEvaluateOutputArgs):
+        # 1) Read data
+        self.reader.validate_input(args_in)
+        self.reader.validate_output(args_out)
+        df = self.reader.read_csv_to_df(args_in.input_csv)
+        model = self.reader.read_dt_model_from_joblib_file(args_in)
 
-        column_label = args.column_label
-        y = df[column_label].values
-        x = df.drop(columns=[column_label])
+        # 2) Calculate report from data
+        y = self.calculator.get_output_from_data_label(args_al, df)
+        x = self.calculator.get_input_from_data_label(args_al, df)
+        prob = self.calculator.get_prob_from_model_x(model, x)
+        pred = self.calculator.get_pred_from_prob_threshold(prob, args_al.threshold)
+        report = self.calculator.get_report_from_y_prob_pred(y, prob, pred)
 
-        proba = DtPeDataEvaluator.get_proba(model, x)
-        y_pred = (proba >= args.threshold).astype(int)
-
-        auc = roc_auc_score(y, proba)
-        acc = accuracy_score(y, y_pred)
-        cm = confusion_matrix(y, y_pred)
-
-        self.write_out_json(acc, args, auc, cm)
-        self.write_out_md(acc, args, auc, cm)
-
-        file_validator = FileIoValidator()
-        spec_factory = ConfusionMatrixPlotSpecFactory()
-        plot_renderer = MatplotlibPlotRenderer()
-        plot_writer = MlIoPlotWriter(file_validator, spec_factory, plot_renderer)
-        plot_writer.create_plot(args.out_png, cm)
-
-        print("End DtPeDataEvaluator")
-
-    @staticmethod
-    def get_proba(model, x):
-        is_proba = hasattr(model, 'predict_proba')
-        if is_proba:
-            predict_proba = model.predict_proba(x)
-            return predict_proba[:, 1]
-        return (lambda d: (d - d.min()) / (d.max() - d.min() + 1e-9))(model.decision_function(x))
+        # 3) Write report to files
+        self.writer.write_out_json(args_out.out_json, args_al.threshold, report)
+        self.writer.write_out_md(args_out.out_md, args_al.threshold, report)
+        self.writer.create_plot_of_confusion_matrix(args_out.out_png, report)
 
 
-    def write_out_json(self, acc, args, auc, cm):
-        json_data = DtPeDataEvaluator.build_accuracy_measure(acc, args, auc, cm)
-        json.dump(json_data, open(args.out_json, 'w'), indent=2)
 
-    def write_out_md(self, acc, args, auc, cm):
-        md = f"""# Decision Tree — Test Metrics\n\n- AUC: {auc:.4f}\n- Accuracy: {acc:.4f}\n- Threshold: {args.threshold:.2f}\n\n**Confusion Matrix** (rows=Actual, cols=Predicted):\n{cm.tolist()}\n"""
-        open(args.out_md, 'w').write(md)
-        print(md)
-
-
-    @staticmethod
-    def build_accuracy_measure(acc, args, auc, cm):
-        return {'auc': float(auc),
-                'accuracy': float(acc),
-                'threshold': args.threshold,
-                'confusion_matrix': cm.tolist()}
 
 
 
