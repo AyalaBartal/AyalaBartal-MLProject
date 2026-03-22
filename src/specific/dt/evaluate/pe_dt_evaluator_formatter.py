@@ -8,9 +8,13 @@ class DtPeEvaluatorFormatter:
                 'confusion_matrix': report.cm.tolist()
                 }
 
-    def get_md_from_report_threshold(self, report, threshold):
-        acc = report.acc
-        auc = report.auc
-        cm = report.cm
-        md = f"""# Decision Tree — Test Metrics\n\n- AUC: {auc:.4f}\n- Accuracy: {acc:.4f}\n- Threshold: {threshold:.2f}\n\n**Confusion Matrix** (rows=Actual, cols=Predicted):\n{cm.tolist()}\n"""
-        return md
+    @staticmethod
+    def get_md_from_report_threshold(report, threshold):
+        lines = [
+            "# Decision Tree — Test Metrics",
+            f"- AUC: {report.auc:.4f}",
+            f"- Accuracy: {report.acc:.4f}",
+            f"- Threshold: {threshold:.2f}",
+            f"- Confusion: {report.cm.tolist()}",
+        ]
+        return "\n".join(lines)
