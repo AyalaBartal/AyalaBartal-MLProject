@@ -7,7 +7,7 @@ from src.common.plot.confusion_matrix_spec_factory import ConfusionMatrixPlotSpe
 from src.specific.dt.evaluate import DtPeEvaluatorWriter, DtPeEvaluatorFormatter, FileWriter
 from src.specific.dt.evaluate.pe_dt_evaluator_calculator import DtPeEvaluatorCalculator
 from src.specific.dt.evaluate.pe_dt_evaluator import DtPeDataEvaluator
-from src.specific.dt.evaluate.file_util import FileUtil
+from src.common.validator.file_validator import FileValidator
 from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
 
 
@@ -20,7 +20,7 @@ class DtPeEvaluatorProvider:
         return DtPeDataEvaluator(reader, calculator, writer)
 
     def get_evaluator_reader(self):
-        dir_validator = FileUtil()
+        dir_validator = FileValidator()
         return DtPeEvaluatorReader(dir_validator)
 
     def get_evaluator_writer(self):

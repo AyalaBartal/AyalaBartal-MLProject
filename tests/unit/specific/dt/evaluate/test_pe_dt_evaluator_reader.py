@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 
 from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
-from src.specific.dt.evaluate.file_util import FileUtil
+from src.common.validator.file_validator import FileValidator
 
 
 class TestDtPeEvaluatorReader(unittest.TestCase):
 
     def setUp(self):
-        self.validator = MagicMock(spec=FileUtil)
+        self.validator = MagicMock(spec=FileValidator)
         self.reader = DtPeEvaluatorReader(self.validator)
 
     def test_validate_output_calls_validate_directory_with_expected_args(self):

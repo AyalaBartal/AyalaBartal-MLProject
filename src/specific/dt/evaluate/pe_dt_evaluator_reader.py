@@ -1,12 +1,12 @@
 import pandas as pd
 from joblib import load
 
-from src.specific.dt.evaluate.file_util import FileUtil
+from src.common.validator.file_validator import FileValidator
 
 
 class DtPeEvaluatorReader:
 
-    def __init__(self, validator: FileUtil):
+    def __init__(self, validator: FileValidator):
         self.validator = validator
 
     def validate_output(self, args_out):
