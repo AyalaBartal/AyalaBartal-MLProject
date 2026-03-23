@@ -16,7 +16,7 @@ from src.specific.dt.preprocess.pe_dt_csv_preprocessor import DtPeCsvPreprocessM
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
 from src.specific.dt.trainer.pe_dt_trainer_provider import DtPeTrainerProvider
-from tests.integration.dt.test_pe_dt_state_helper import TestPePdStateHelper
+from tests.integration.dt.pe_dt_state_provider import PePdTestStateProvider
 from tests.utils.paths_provider import PathsProvider
 
 """
@@ -49,7 +49,7 @@ class TestPePdIntegration(unittest.TestCase):
     def setUpClass(cls):
         cls.start_time = time.perf_counter()
         data_dir = PathsProvider.get_test_data_dir()
-        cls.state = TestPePdStateHelper.get_state(data_dir)
+        cls.state = PePdTestStateProvider.get_state(data_dir)
 
         cls.columns_provider = CsvBrazilianProvider()
         print("Start test {} with state {}".format(cls.__class__.__name__, cls.state))

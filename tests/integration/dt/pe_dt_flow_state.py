@@ -1,4 +1,4 @@
-class TestPePdFlowState:
+class PePdFlowTestState:
     input_csv_file = None
 
     output_root_dir_path = None

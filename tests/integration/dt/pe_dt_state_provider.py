@@ -1,24 +1,24 @@
 import os
 
 from src.common.validator import FileValidator
-from tests.integration.dt.test_pe_dt_flow_state import TestPePdFlowState
+from tests.integration.dt.pe_dt_flow_state import PePdFlowTestState
 
 
-class TestPePdStateHelper:
+class PePdTestStateProvider:
 
     @staticmethod
     def get_state(data_dir):
         input_dir = os.path.join(data_dir, 'integration', 'dt', 'input')
         input_csv_file = os.path.join(input_dir, 'malware_input_full_data.csv')
         output_dir_path = os.path.join(data_dir, 'integration', 'dt', 'output')
-        return TestPePdStateHelper.get_state_by_input_file_and_output_dir(input_csv_file, output_dir_path)
+        return PePdTestStateProvider.get_state_by_input_file_and_output_dir(input_csv_file, output_dir_path)
 
     @staticmethod
     def get_state_by_input_file_and_output_dir(input_csv_file, output_dir_path):
         FileValidator.validate_file(input_csv_file, True, False)
         FileValidator.validate_directory(output_dir_path, True, True)
 
-        state = TestPePdFlowState()
+        state = PePdFlowTestState()
         state.input_csv_file = input_csv_file
         state.output_root_dir_path = output_dir_path
 
