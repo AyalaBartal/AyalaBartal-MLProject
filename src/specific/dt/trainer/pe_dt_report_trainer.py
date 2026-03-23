@@ -1,7 +1,7 @@
+from src.common.validator.args_validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
-from src.specific.dt.trainer.args_validator import ArgsValidator
 
 
 class DtPeReportTrainer:

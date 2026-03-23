@@ -1,10 +1,12 @@
 from typing import Type
 from typing import TypeVar
 
+
 class ArgsValidator:
 
     T = TypeVar("T")
 
+    @staticmethod
     def require_type_not_none(value: object, expected_type: Type[T], description: str) -> T:
         if value is None:
             raise ValueError(f"{description} cannot be None")
