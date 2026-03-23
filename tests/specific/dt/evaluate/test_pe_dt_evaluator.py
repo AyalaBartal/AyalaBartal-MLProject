@@ -2,10 +2,11 @@ import unittest
 import os
 import time
 
-from src.specific.dt.evaluate import DtPeEvaluatorProvider
 from src.specific.dt.evaluate.pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
+from src.specific.dt.evaluate.pe_dt_evaluator_provider import DtPeEvaluatorProvider
+
 
 from tests.utils import PathsProvider
 

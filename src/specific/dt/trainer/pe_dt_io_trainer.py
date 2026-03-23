@@ -1,5 +1,5 @@
-from src.specific.dt.trainer import DtPeDataTrainer
-from src.specific.dt.trainer.args_validator import ArgsValidator
+from src.common.validator.args_validator import ArgsValidator
+from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
 from src.specific.dt.trainer.pe_dt_logic_trainer import DtPeLogicTrainer

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pandas import DataFrame
 
-from src.specific.dt.trainer.args_validator import ArgsValidator
+from src.common.validator.args_validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_report_trainer import DtPeReportTrainer
 from src.specific.dt.trainer.pe_dt_data_trainer import DtPeDataTrainer
 from src.specific.dt.trainer.pe_dt_model_trainer import DtPeModelTrainer

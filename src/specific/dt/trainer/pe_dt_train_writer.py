@@ -1,5 +1,5 @@
+from src.common.validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
-from src.specific.dt.trainer.args_validator import ArgsValidator
 from src.specific.dt.trainer.pe_dt_train_output_mapper import DtPeTrainOutputMapper
 from src.specific.dt.trainer.pe_dt_train_output_writer import DtPeTrainOutputWriter
 from src.specific.dt.trainer.pe_dt_train_result import DtPeTrainResult

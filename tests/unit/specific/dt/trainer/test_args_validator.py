@@ -1,6 +1,6 @@
 import unittest
 
-from src.specific.dt.trainer import ArgsValidator
+from src.common.validator.args_validator import ArgsValidator
 
 
 class TestArgsValidator(unittest.TestCase):
