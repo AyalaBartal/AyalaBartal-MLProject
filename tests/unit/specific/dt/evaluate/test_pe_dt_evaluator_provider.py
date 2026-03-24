@@ -1,7 +1,8 @@
 import unittest
 
+from src.common.validator.file_validator import FileValidator
 from src.common.image.file_io_validator import FileIoValidator
-from src.specific.dt.evaluate import FileUtil, FileWriter
+from src.specific.dt.evaluate.pe_dt_file_writer import FileWriter
 from src.specific.dt.evaluate.pe_dt_evaluator import DtPeDataEvaluator
 from src.specific.dt.evaluate.pe_dt_evaluator_provider import DtPeEvaluatorProvider
 from src.specific.dt.evaluate.pe_dt_evaluator_reader import DtPeEvaluatorReader
@@ -31,7 +32,7 @@ class TestDtPeEvaluatorProvider(unittest.TestCase):
         actual = self.provider.get_evaluator_reader()
 
         self.assertIsInstance(actual, DtPeEvaluatorReader)
-        self.assertIsInstance(actual.validator, FileUtil)
+        self.assertIsInstance(actual.validator, FileValidator)
 
     def test_get_evaluator_writer_returns_writer_with_expected_dependencies(self):
         actual = self.provider.get_evaluator_writer()

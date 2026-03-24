@@ -40,7 +40,7 @@ class TestMlIoImageWriter(unittest.TestCase):
         self.locator.get_dot_executable.assert_called_once_with()
         self.validator.validate_file_readable.assert_called_once_with(self.input_file)
         self.validator.validate_file_executable.assert_called_once_with(self.dot_exe)
-        self.validator.validate_file_writable.assert_called_once_with(self.out_file)
+        self.validator.validate_file_writeable.assert_called_once_with(self.out_file)
 
         # Executor called with exact args
         self.executor.run.assert_called_once_with(
@@ -74,7 +74,7 @@ class TestMlIoImageWriter(unittest.TestCase):
 
     def test_create_jpg_from_dot_stops_if_writable_validation_fails(self):
         self.locator.get_dot_executable.return_value = self.dot_exe
-        self.validator.validate_file_writable.side_effect = ValueError("not writable")
+        self.validator.validate_file_writeable.side_effect = ValueError("not writable")
 
         with self.assertRaises(ValueError):
             self.writer.create_jpg_from_dot(self.input_file, self.out_file)
@@ -98,7 +98,7 @@ class TestMlIoImageWriter(unittest.TestCase):
             [
                 call.validate_file_readable(self.input_file),
                 call.validate_file_executable(self.dot_exe),
-                call.validate_file_writable(self.out_file),
+                call.validate_file_writeable(self.out_file),
             ]
         )
         self.assertEqual(
