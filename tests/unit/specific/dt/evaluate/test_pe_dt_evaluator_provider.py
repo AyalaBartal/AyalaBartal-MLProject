@@ -1,6 +1,6 @@
 import unittest
 
-from common.validator.file_validator import FileValidator
+from src.common.validator.file_validator import FileValidator
 from src.common.image.file_io_validator import FileIoValidator
 from src.specific.dt.evaluate.pe_dt_file_writer import FileWriter
 from src.specific.dt.evaluate.pe_dt_evaluator import DtPeDataEvaluator
