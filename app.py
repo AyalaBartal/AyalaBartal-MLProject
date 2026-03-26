@@ -223,9 +223,17 @@ def upload_file():
                     
                     if failed_indices:
                         flash(f'⚠️ Skipped {len(failed_indices)} rows that failed preprocessing')
-                    
+
                     # Combine successful rows
-                    X_transformed = pd.concat(successful_rows, ignore_index=True)
+                    row_dfs = []
+
+                    for i, row_parts in enumerate(successful_rows):
+                        if (i + 1) % 100 == 0:
+                            print(f"Building row_dfs: {i + 1}/{len(successful_rows)}")
+
+                        row_df = pd.concat(row_parts, axis=1)
+                        row_dfs.append(row_df)
+                    X_transformed = pd.concat(row_dfs, ignore_index=True)
                     
                     # Update y to match successful rows
                     if y is not None:
