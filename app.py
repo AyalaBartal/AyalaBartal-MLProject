@@ -130,11 +130,14 @@ def predict_raw():
         
         # Convert to DataFrame for preprocessing
         df = pd.DataFrame([raw_data])
-        
+
         # Preprocess
         transformer = DtPePreprocessorProvider.get_transformer()
         X_transformed = transformer.transform(df)
-        
+
+        # transformer returns a list of DataFrames, so combine them into one DataFrame
+        X_transformed = pd.concat(X_transformed, axis=1)
+
         # Align with model features
         model_features = FEATURE_NAMES
         for col in set(model_features) - set(X_transformed.columns):
