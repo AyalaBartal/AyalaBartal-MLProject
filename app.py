@@ -31,16 +31,43 @@ def to_json(value):
 # Create upload directory
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load real model with transformer
-detector = MalwareDetector(
+# Load real models with transformers
+dt_detector = MalwareDetector(
     'models/decision_tree/decision_tree_model.joblib',
     transformer_path='models/decision_tree/decision_tree_transformer.joblib'
 )
 
-# Load feature names from schema
+rf_detector = None
+rf_available = False
+try:
+    rf_detector = MalwareDetector(
+        'models/random_forest/random_forest_model.joblib',
+        transformer_path=None  # RF doesn't use sklearn transformer
+    )
+    rf_available = True
+except Exception as e:
+    print(f"Warning: RF model not available: {e}")
+
+# Default to DT, will be overridden by model parameter in routes
+detector = dt_detector
+
+# Load feature names from DT schema
 with open('models/decision_tree/dt_feature_schema.json', 'r') as f:
     schema = json.load(f)
-    FEATURE_NAMES = schema['feature_order']
+    DT_FEATURE_NAMES = schema['feature_order']
+
+# Load RF feature names if available
+RF_FEATURE_NAMES = None
+if rf_available:
+    try:
+        with open('models/random_forest/rf_feature_schema.json', 'r') as f:
+            rf_schema = json.load(f)
+            RF_FEATURE_NAMES = rf_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: RF feature schema not found: {e}")
+
+# Default to DT features
+FEATURE_NAMES = DT_FEATURE_NAMES
 
 # Generate demo data (all zeros as placeholder)
 DEMO_DATA = [0.0] * len(FEATURE_NAMES)
@@ -90,23 +117,36 @@ def index():
                          demo_data=DEMO_DATA, 
                          feature_names=FEATURE_NAMES,
                          raw_fields=RAW_FIELDS,
-                         raw_demo_data=RAW_DEMO_DATA)
+                         raw_demo_data=RAW_DEMO_DATA,
+                         rf_available=rf_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        # Get model selection from form
+        model_param = request.form.get('model', 'dt')
+        
+        # Select detector and feature names based on model
+        if model_param == 'rf' and rf_available:
+            selected_detector = rf_detector
+            selected_features = RF_FEATURE_NAMES
+        else:
+            selected_detector = dt_detector
+            selected_features = DT_FEATURE_NAMES
+        
         # Get features from form
         features = []
-        for i in range(len(FEATURE_NAMES)):
+        for i in range(len(selected_features)):
             feature = request.form.get(f'feature_{i}', 0)
             features.append(float(feature))
         
         # Make prediction
-        result = detector.predict(features)
+        result = selected_detector.predict(features)
         
         return render_template('result.html', 
                              prediction=result['label'],
-                             probability=result['probability'])
+                             probability=result['probability'],
+                             model_used=model_param.upper())
     except Exception as e:
         flash(f'Error: {str(e)}')
         return redirect(url_for('index'))
@@ -115,6 +155,9 @@ def predict():
 def predict_raw():
     print("=== SINGLE SAMPLE PREDICTION ===")
     try:
+        # Get model selection
+        model_param = request.form.get('model', 'dt')
+        
         # Get raw features from form
         raw_data = {}
         for field in RAW_FIELDS:
@@ -142,18 +185,26 @@ def predict_raw():
         # transformer returns a list of DataFrames, so combine them into one DataFrame
         X_transformed = pd.concat(X_transformed, axis=1)
 
+        # Select model and features
+        if model_param == 'rf' and rf_available:
+            selected_detector = rf_detector
+            model_features = RF_FEATURE_NAMES
+        else:
+            selected_detector = dt_detector
+            model_features = DT_FEATURE_NAMES
+        
         # Align with model features
-        model_features = FEATURE_NAMES
         for col in set(model_features) - set(X_transformed.columns):
             X_transformed[col] = 0
         X_transformed = X_transformed[model_features]
         
         # Make prediction
-        result = detector.predict(X_transformed.values[0].tolist())
+        result = selected_detector.predict(X_transformed.values[0].tolist())
         
         return render_template('result.html', 
                              prediction=result['label'],
-                             probability=result['probability'])
+                             probability=result['probability'],
+                             model_used=model_param.upper())
     except Exception as e:
         import traceback
         print(f"Single sample error: {traceback.format_exc()}")
@@ -171,6 +222,9 @@ def upload_file():
     if file.filename == '':
         flash('No file selected')
         return redirect(url_for('index'))
+    
+    # Get model selection
+    model_param = request.form.get('model', 'dt')
     
     if file and file.filename.endswith('.csv'):
         filename = secure_filename(file.filename)
@@ -195,6 +249,14 @@ def upload_file():
             
             # Detect if raw data (has raw field names) or preprocessed
             is_raw = any(field in df.columns for field in RAW_FIELDS[:5])
+            
+            # Select model and features
+            if model_param == 'rf' and rf_available:
+                selected_detector = rf_detector
+                model_features = RF_FEATURE_NAMES
+            else:
+                selected_detector = dt_detector
+                model_features = DT_FEATURE_NAMES
             
             if is_raw:
                 # Raw data - use preprocessing pipeline
@@ -247,7 +309,6 @@ def upload_file():
                         y = y.drop(failed_indices).reset_index(drop=True)
                     
                     # Align columns with model's expected features
-                    model_features = FEATURE_NAMES
                     missing_cols = set(model_features) - set(X_transformed.columns)
                     
                     # Add missing columns with zeros
@@ -262,7 +323,7 @@ def upload_file():
                     print(f"Non-zero features: {(X_transformed != 0).sum().sum()}")
                     print(f"Feature variance sample: {X_transformed.var().head(10).to_dict()}")
                     
-                    predictions = detector.predict_batch(X_transformed.values.tolist())
+                    predictions = selected_detector.predict_batch(X_transformed.values.tolist())
                 except Exception as e:
                     import traceback
                     print(f"Full error: {traceback.format_exc()}")
@@ -277,7 +338,7 @@ def upload_file():
                     X = df
                     y = None
                 
-                predictions = detector.predict_batch(X.values.tolist())
+                predictions = selected_detector.predict_batch(X.values.tolist())
             
             # Calculate metrics if labels exist
             metrics = None
