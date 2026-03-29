@@ -289,26 +289,39 @@ def upload_file():
                     mapper = DtPePreprocessorProvider.get_mapper()
                     X_transformed = mapper.map(df_features)
                     
-                    # IMPORTANT: Mapper sometimes produces duplicate columns (e.g., 'dll__' appears twice)
-                    # Remove duplicate columns, keeping only the first occurrence
-                    X_transformed = X_transformed.loc[:, ~X_transformed.columns.duplicated()]
+                    # For DT: Remove duplicate columns (mapper produces duplicate 'dll__')
+                    # For RF: Keep duplicates (model was trained with them)
+                    if model_param != 'rf':
+                        X_transformed = X_transformed.loc[:, ~X_transformed.columns.duplicated()]
                     
                     # Update y to match if preprocessing changed row count
                     if y is not None and len(X_transformed) < len(y):
                         y = y.iloc[:len(X_transformed)].reset_index(drop=True)
                     
                     # Align columns with model's expected features
-                    missing_cols = set(model_features) - set(X_transformed.columns)
-                    
-                    # Add missing columns with zeros
-                    for col in missing_cols:
-                        X_transformed[col] = 0.0
-                    
-                    # Remove extra columns and reorder to match model
-                    X_transformed = X_transformed[model_features]
+                    # For RF: sklearn requires exact feature count with duplicates
+                    # Use pandas iloc to match feature indices instead of dropping
+                    if model_param == 'rf':
+                        # RF expects all features in schema order, including duplicates
+                        # Create array with exact number of columns
+                        X_array = np.zeros((X_transformed.shape[0], len(model_features)))
+                        
+                        # Fill in available columns
+                        col_to_idx = {col: i for i, col in enumerate(X_transformed.columns)}
+                        for i, feature_name in enumerate(model_features):
+                            if feature_name in col_to_idx:
+                                X_array[:, i] = X_transformed.iloc[:, col_to_idx[feature_name]].values
+                        
+                        X_transformed = X_array
+                    else:
+                        # DT: Remove duplicates first, then align
+                        missing_cols = set(model_features) - set(X_transformed.columns)
+                        for col in missing_cols:
+                            X_transformed[col] = 0.0
+                        X_transformed = X_transformed[model_features]
                     
                     # Debug: Check feature count
-                    print(f"Transformed shape: {X_transformed.shape}")
+                    print(f"Transformed shape: {X_transformed.shape if isinstance(X_transformed, np.ndarray) else X_transformed.shape}")
                     print(f"Expected features: {len(model_features)}")
                     print(f"Actual features: {X_transformed.shape[1]}")
                     
@@ -406,4 +419,4 @@ def rf_visualization():
         return f"Error serving visualization: {str(e)}", 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5555)
+    app.run(debug=True)
