@@ -321,11 +321,17 @@ def upload_file():
                         X_transformed = X_transformed[model_features]
                     
                     # Debug: Check feature count
-                    print(f"Transformed shape: {X_transformed.shape if isinstance(X_transformed, np.ndarray) else X_transformed.shape}")
+                    print(f"Transformed shape: {X_transformed.shape}")
                     print(f"Expected features: {len(model_features)}")
                     print(f"Actual features: {X_transformed.shape[1]}")
                     
-                    predictions = selected_detector.predict_batch(X_transformed.values.tolist())
+                    # Convert to list (handle both DataFrame and numpy array)
+                    if isinstance(X_transformed, np.ndarray):
+                        features_list = X_transformed.tolist()
+                    else:
+                        features_list = X_transformed.values.tolist()
+                    
+                    predictions = selected_detector.predict_batch(features_list)
                 except Exception as e:
                     import traceback
                     print(f"Full error: {traceback.format_exc()}")
