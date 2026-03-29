@@ -269,62 +269,13 @@ def upload_file():
                     df_features = df
                 
                 try:
-                    # Import and use the preprocessing classes
-                    from src.common.preprocessor.pe_dt_data_transformer import DtPeDataTransformer
-                    from src.common.preprocessor.column_transformer_registry import ColumnTransformerRegistry
-                    from src.common.preprocessor.column_transformer_map_provider import ColumnTransformerMapProvider
-                    from src.common.preprocessor.column_transformer_one_provider import ColumnTransformerOneProvider
-                    from src.common.preprocessor.pe_dt_string_converter import DtPeStringConverter
-                    from src.common.preprocessor.pe_dt_list_converter import DtPeListConverter
-                    from src.common.preprocessor.pe_dt_data_frame_converter import DtPeDataFrameConverter
-                    from src.common.preprocessor.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
-
-                    # Build transformer like the trainer does
-                    args = DtPeDataPreprocessMapArgs()
-                    c_str = DtPeStringConverter()
-                    c_list = DtPeListConverter()
-                    c_df = DtPeDataFrameConverter()
-                    c_t_one_provider = ColumnTransformerOneProvider(c_str, c_list, c_df)
-                    c_t_map_provider = ColumnTransformerMapProvider(c_t_one_provider)
-                    registry = ColumnTransformerRegistry(c_t_map_provider, args)
-                    transformer = DtPeDataTransformer(registry)
-
-                    # Process rows
-                    successful_rows = []
-                    failed_indices = []
+                    # Use the mapper to preprocess (same as training)
+                    mapper = DtPePreprocessorProvider.get_mapper()
+                    X_transformed = mapper.map(df_features)
                     
-                    for idx in range(len(df_features)):
-                        try:
-                            row_df = df_features.iloc[idx:idx+1]
-                            X_row = transformer.transform(row_df)
-                            successful_rows.append(X_row)
-                        except Exception as row_error:
-                            failed_indices.append(idx)
-                            continue
-                    
-                    if not successful_rows:
-                        flash('❌ All rows failed preprocessing. Please check your data format.')
-                        return redirect(url_for('index'))
-                    
-                    if failed_indices:
-                        flash(f'⚠️ Skipped {len(failed_indices)} rows that failed preprocessing')
-
-                    # Combine rows and cleanup (like the mapper does)
-                    row_dfs = []
-                    for i, row_parts in enumerate(successful_rows):
-                        row_df = pd.concat(row_parts, axis=1)
-                        row_dfs.append(row_df)
-                    X_transformed = pd.concat(row_dfs, ignore_index=True)
-                    
-                    # Cleanup like the mapper does
-                    X_transformed = X_transformed.replace([np.inf, -np.inf], 0).fillna(0)
-                    import re
-                    X_transformed.columns = [re.sub(r"[^0-9A-Za-z_]+", "_", str(c)) for c in X_transformed.columns]
-                    X_transformed = X_transformed.sort_index(axis=1)  # Sort columns alphabetically
-                    
-                    # Update y to match successful rows
-                    if y is not None:
-                        y = y.drop(failed_indices).reset_index(drop=True)
+                    # Update y to match if preprocessing changed row count
+                    if y is not None and len(X_transformed) < len(y):
+                        y = y.iloc[:len(X_transformed)].reset_index(drop=True)
                     
                     # Align columns with model's expected features
                     missing_cols = set(model_features) - set(X_transformed.columns)
