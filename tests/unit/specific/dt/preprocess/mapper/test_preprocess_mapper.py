@@ -5,8 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from src.specific.dt.preprocess.pe_dt_preprocess_mapper import DtPePreprocessMapper
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor import DtPePreprocessMapper, DtPeDataPreprocessMapArgs
 
 
 class TestDtPePreprocessMapper(unittest.TestCase):

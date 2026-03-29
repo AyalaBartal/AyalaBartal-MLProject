@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import re
 
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
-from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
+from src.common.preprocessor.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor.pe_dt_data_transformer import DtPeDataTransformer
 
 
 class DtPePreprocessMapper:

@@ -1,4 +1,4 @@
-from src.specific.dt.preprocess import DtPeStringConverter
+from src.common.preprocessor import DtPeStringConverter
 
 
 class DtPeListConverter:

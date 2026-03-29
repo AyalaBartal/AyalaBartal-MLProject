@@ -1,7 +1,7 @@
 from typing import Callable, List
 import pandas as pd
 
-from src.specific.dt.preprocess.column_transformer import ColumnTransformer
+from src.common.preprocessor.column_transformer import ColumnTransformer
 
 
 class ImportedDllsColumnTransformer(ColumnTransformer):

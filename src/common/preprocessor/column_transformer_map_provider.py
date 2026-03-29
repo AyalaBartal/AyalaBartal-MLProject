@@ -1,7 +1,7 @@
 from typing import Dict
 
-from src.specific.dt.preprocess.column_transformer_one_provider import ColumnTransformerOneProvider
-from src.specific.dt.preprocess.column_transformer import ColumnTransformer
+from src.common.preprocessor.column_transformer_one_provider import ColumnTransformerOneProvider
+from src.common.preprocessor.column_transformer import ColumnTransformer
 
 
 class ColumnTransformerMapProvider:

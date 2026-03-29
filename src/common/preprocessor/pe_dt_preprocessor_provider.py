@@ -1,13 +1,13 @@
-from src.specific.dt.preprocess.column_transformer_map_provider import ColumnTransformerMapProvider
-from src.specific.dt.preprocess.column_transformer_one_provider import ColumnTransformerOneProvider
-from src.specific.dt.preprocess.pe_dt_string_converter import DtPeStringConverter
-from src.specific.dt.preprocess.pe_dt_list_converter import DtPeListConverter
-from src.specific.dt.preprocess.pe_dt_data_frame_converter import DtPeDataFrameConverter
+from src.common.preprocessor.column_transformer_map_provider import ColumnTransformerMapProvider
+from src.common.preprocessor.column_transformer_one_provider import ColumnTransformerOneProvider
+from src.common.preprocessor.pe_dt_string_converter import DtPeStringConverter
+from src.common.preprocessor.pe_dt_list_converter import DtPeListConverter
+from src.common.preprocessor.pe_dt_data_frame_converter import DtPeDataFrameConverter
 
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
-from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
-from src.specific.dt.preprocess.pe_dt_data_transformer import DtPeDataTransformer
-from src.specific.dt.preprocess.pe_dt_preprocess_mapper import DtPePreprocessMapper
+from src.common.preprocessor.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor.column_transformer_registry import ColumnTransformerRegistry
+from src.common.preprocessor.pe_dt_data_transformer import DtPeDataTransformer
+from src.common.preprocessor.pe_dt_preprocess_mapper import DtPePreprocessMapper
 
 
 class DtPePreprocessorProvider:

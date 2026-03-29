@@ -6,8 +6,8 @@
 - Text/list Top-K counts
 - Datetime parts + flags; ratios & structural flags
 """
-from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
-from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
+from src.common.preprocessor.multi_column_transformer import MultiColumnTransformer
+from src.common.preprocessor.column_transformer_registry import ColumnTransformerRegistry
 
 
 class DtPeDataTransformer:

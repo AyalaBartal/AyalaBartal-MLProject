@@ -3,7 +3,7 @@ from typing import Callable, List
 import numpy as np
 import pandas as pd
 
-from src.specific.dt.preprocess.column_transformer import ColumnTransformer
+from src.common.preprocessor.column_transformer import ColumnTransformer
 
 
 class FrequencyColumnTransformer(ColumnTransformer):

@@ -6,9 +6,13 @@ import json
 from werkzeug.utils import secure_filename
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 
-from src.specific.dt.preprocess import DtPeStringConverter, DtPeListConverter, DtPePreprocessorProvider
-from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor import (
+    DtPeStringConverter,
+    DtPeListConverter,
+    DtPePreprocessorProvider,
+    ColumnTransformerRegistry,
+    DtPeDataPreprocessMapArgs,
+)
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))

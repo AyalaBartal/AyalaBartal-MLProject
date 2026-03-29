@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Dict, List
 import pandas as pd
 
-from src.specific.dt.preprocess.column_transformer import ColumnTransformer
+from src.common.preprocessor.column_transformer import ColumnTransformer
 
 """
 Map one input column into multiple output columns using Dict transformer_by_name.

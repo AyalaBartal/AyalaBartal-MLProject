@@ -1,6 +1,6 @@
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
-from src.specific.dt.preprocess.column_transformer_map_provider import ColumnTransformerMapProvider
-from src.specific.dt.preprocess.column_transformer import ColumnTransformer
+from src.common.preprocessor.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor.column_transformer_map_provider import ColumnTransformerMapProvider
+from src.common.preprocessor.column_transformer import ColumnTransformer
 
 """
 Provide a ColumnTransformer instance for each supported csv input column name.

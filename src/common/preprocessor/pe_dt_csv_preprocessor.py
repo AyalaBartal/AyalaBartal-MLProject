@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.specific.dt.preprocess import DtPeDataPreprocessCsvArgs, DtPePreprocessMapper
+from src.common.preprocessor import DtPeDataPreprocessCsvArgs, DtPePreprocessMapper
 
 
 class DtPeCsvPreprocessMapper:
