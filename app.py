@@ -409,9 +409,11 @@ def dt_visualization():
 @app.route('/model/rf/visualization')
 def rf_visualization():
     """Generate and serve random forest feature importance visualization"""
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-interactive backend
     import matplotlib.pyplot as plt
-    import io
     import pandas as pd
+    from flask import send_file
     
     try:
         # Load feature importance
@@ -442,17 +444,16 @@ def rf_visualization():
         
         plt.tight_layout()
         
-        # Save to bytes
-        img_io = io.BytesIO()
-        plt.savefig(img_io, format='png', dpi=100, bbox_inches='tight')
-        img_io.seek(0)
+        # Save to file
+        viz_path = 'models/random_forest/feature_importance.png'
+        plt.savefig(viz_path, format='png', dpi=100, bbox_inches='tight')
         plt.close()
         
-        from flask import send_file as send_file_direct
-        return send_file_direct(img_io, mimetype='image/png')
+        return send_file(viz_path, mimetype='image/png')
     except Exception as e:
         print(f"Error generating RF visualization: {e}")
-        # Return a placeholder image or error message
+        import traceback
+        print(traceback.format_exc())
         return f"Error generating visualization: {str(e)}", 500
 
 if __name__ == '__main__':
