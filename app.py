@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 import pandas as pd
+import numpy as np
 import os
 import sys
 import json
@@ -269,10 +270,26 @@ def upload_file():
                 
                 try:
                     # Import and use the preprocessing classes
-                    transformer = DtPePreprocessorProvider.get_transformer()
+                    from src.common.preprocessor.pe_dt_data_transformer import DtPeDataTransformer
+                    from src.common.preprocessor.column_transformer_registry import ColumnTransformerRegistry
+                    from src.common.preprocessor.column_transformer_map_provider import ColumnTransformerMapProvider
+                    from src.common.preprocessor.column_transformer_one_provider import ColumnTransformerOneProvider
+                    from src.common.preprocessor.pe_dt_string_converter import DtPeStringConverter
+                    from src.common.preprocessor.pe_dt_list_converter import DtPeListConverter
+                    from src.common.preprocessor.pe_dt_data_frame_converter import DtPeDataFrameConverter
+                    from src.common.preprocessor.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
 
-                    # Transform with same parameters as training
-                    # Process in batches and skip rows that fail
+                    # Build transformer like the trainer does
+                    args = DtPeDataPreprocessMapArgs()
+                    c_str = DtPeStringConverter()
+                    c_list = DtPeListConverter()
+                    c_df = DtPeDataFrameConverter()
+                    c_t_one_provider = ColumnTransformerOneProvider(c_str, c_list, c_df)
+                    c_t_map_provider = ColumnTransformerMapProvider(c_t_one_provider)
+                    registry = ColumnTransformerRegistry(c_t_map_provider, args)
+                    transformer = DtPeDataTransformer(registry)
+
+                    # Process rows
                     successful_rows = []
                     failed_indices = []
                     
@@ -283,7 +300,6 @@ def upload_file():
                             successful_rows.append(X_row)
                         except Exception as row_error:
                             failed_indices.append(idx)
-                            print(f"Row {idx} failed: {str(row_error)}")
                             continue
                     
                     if not successful_rows:
@@ -293,16 +309,18 @@ def upload_file():
                     if failed_indices:
                         flash(f'⚠️ Skipped {len(failed_indices)} rows that failed preprocessing')
 
-                    # Combine successful rows
+                    # Combine rows and cleanup (like the mapper does)
                     row_dfs = []
-
                     for i, row_parts in enumerate(successful_rows):
-                        if (i + 1) % 100 == 0:
-                            print(f"Building row_dfs: {i + 1}/{len(successful_rows)}")
-
                         row_df = pd.concat(row_parts, axis=1)
                         row_dfs.append(row_df)
                     X_transformed = pd.concat(row_dfs, ignore_index=True)
+                    
+                    # Cleanup like the mapper does
+                    X_transformed = X_transformed.replace([np.inf, -np.inf], 0).fillna(0)
+                    import re
+                    X_transformed.columns = [re.sub(r"[^0-9A-Za-z_]+", "_", str(c)) for c in X_transformed.columns]
+                    X_transformed = X_transformed.sort_index(axis=1)  # Sort columns alphabetically
                     
                     # Update y to match successful rows
                     if y is not None:
@@ -318,10 +336,10 @@ def upload_file():
                     # Remove extra columns and reorder to match model
                     X_transformed = X_transformed[model_features]
                     
-                    # Debug: Check feature variance
+                    # Debug: Check feature count
                     print(f"Transformed shape: {X_transformed.shape}")
-                    print(f"Non-zero features: {(X_transformed != 0).sum().sum()}")
-                    print(f"Feature variance sample: {X_transformed.var().head(10).to_dict()}")
+                    print(f"Expected features: {len(model_features)}")
+                    print(f"Actual features: {X_transformed.shape[1]}")
                     
                     predictions = selected_detector.predict_batch(X_transformed.values.tolist())
                 except Exception as e:

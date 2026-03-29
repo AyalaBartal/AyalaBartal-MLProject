@@ -11,9 +11,9 @@
     ]
   ],
   "auc_mean": 1.0,
-  "auc_std": 0,
+  "auc_std": 0.0,
   "acc_mean": 1.0,
-  "acc_std": 0,
-  "n_features": 473,
+  "acc_std": 0.0,
+  "n_features": 410,
   "n_samples": 71297
 }
