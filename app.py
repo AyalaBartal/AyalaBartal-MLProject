@@ -250,13 +250,14 @@ def upload_file():
             # Detect if raw data (has raw field names) or preprocessed
             is_raw = any(field in df.columns for field in RAW_FIELDS[:5])
             
-            # Select model and features
+            # Select model
             if model_param == 'rf' and rf_available:
                 selected_detector = rf_detector
-                model_features = RF_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
-                model_features = DT_FEATURE_NAMES
+            
+            # Always use DT features for alignment consistency across both models
+            model_features = DT_FEATURE_NAMES
             
             if is_raw:
                 # Raw data - use preprocessing pipeline
