@@ -1,14 +1,19 @@
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 import pandas as pd
+import numpy as np
 import os
 import sys
 import json
 from werkzeug.utils import secure_filename
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 
-from src.specific.dt.preprocess import DtPeStringConverter, DtPeListConverter, DtPePreprocessorProvider
-from src.specific.dt.preprocess.column_transformer_registry import ColumnTransformerRegistry
-from src.specific.dt.preprocess.pe_dt_preprocess_map_args import DtPeDataPreprocessMapArgs
+from src.common.preprocessor import (
+    DtPeStringConverter,
+    DtPeListConverter,
+    DtPePreprocessorProvider,
+    ColumnTransformerRegistry,
+    DtPeDataPreprocessMapArgs,
+)
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -27,16 +32,43 @@ def to_json(value):
 # Create upload directory
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load real model with transformer
-detector = MalwareDetector(
+# Load real models with transformers
+dt_detector = MalwareDetector(
     'models/decision_tree/decision_tree_model.joblib',
     transformer_path='models/decision_tree/decision_tree_transformer.joblib'
 )
 
-# Load feature names from schema
+rf_detector = None
+rf_available = False
+try:
+    rf_detector = MalwareDetector(
+        'models/random_forest/random_forest_model.joblib',
+        transformer_path=None  # RF doesn't use sklearn transformer
+    )
+    rf_available = True
+except Exception as e:
+    print(f"Warning: RF model not available: {e}")
+
+# Default to DT, will be overridden by model parameter in routes
+detector = dt_detector
+
+# Load feature names from DT schema
 with open('models/decision_tree/dt_feature_schema.json', 'r') as f:
     schema = json.load(f)
-    FEATURE_NAMES = schema['feature_order']
+    DT_FEATURE_NAMES = schema['feature_order']
+
+# Load RF feature names if available
+RF_FEATURE_NAMES = None
+if rf_available:
+    try:
+        with open('models/random_forest/rf_feature_schema.json', 'r') as f:
+            rf_schema = json.load(f)
+            RF_FEATURE_NAMES = rf_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: RF feature schema not found: {e}")
+
+# Default to DT features
+FEATURE_NAMES = DT_FEATURE_NAMES
 
 # Generate demo data (all zeros as placeholder)
 DEMO_DATA = [0.0] * len(FEATURE_NAMES)
@@ -86,23 +118,36 @@ def index():
                          demo_data=DEMO_DATA, 
                          feature_names=FEATURE_NAMES,
                          raw_fields=RAW_FIELDS,
-                         raw_demo_data=RAW_DEMO_DATA)
+                         raw_demo_data=RAW_DEMO_DATA,
+                         rf_available=rf_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        # Get model selection from form
+        model_param = request.form.get('model', 'dt')
+        
+        # Select detector and feature names based on model
+        if model_param == 'rf' and rf_available:
+            selected_detector = rf_detector
+            selected_features = RF_FEATURE_NAMES
+        else:
+            selected_detector = dt_detector
+            selected_features = DT_FEATURE_NAMES
+        
         # Get features from form
         features = []
-        for i in range(len(FEATURE_NAMES)):
+        for i in range(len(selected_features)):
             feature = request.form.get(f'feature_{i}', 0)
             features.append(float(feature))
         
         # Make prediction
-        result = detector.predict(features)
+        result = selected_detector.predict(features)
         
         return render_template('result.html', 
                              prediction=result['label'],
-                             probability=result['probability'])
+                             probability=result['probability'],
+                             model_used=model_param.upper())
     except Exception as e:
         flash(f'Error: {str(e)}')
         return redirect(url_for('index'))
@@ -111,6 +156,9 @@ def predict():
 def predict_raw():
     print("=== SINGLE SAMPLE PREDICTION ===")
     try:
+        # Get model selection
+        model_param = request.form.get('model', 'dt')
+        
         # Get raw features from form
         raw_data = {}
         for field in RAW_FIELDS:
@@ -138,18 +186,26 @@ def predict_raw():
         # transformer returns a list of DataFrames, so combine them into one DataFrame
         X_transformed = pd.concat(X_transformed, axis=1)
 
+        # Select model and features
+        if model_param == 'rf' and rf_available:
+            selected_detector = rf_detector
+            model_features = RF_FEATURE_NAMES
+        else:
+            selected_detector = dt_detector
+            model_features = DT_FEATURE_NAMES
+        
         # Align with model features
-        model_features = FEATURE_NAMES
         for col in set(model_features) - set(X_transformed.columns):
             X_transformed[col] = 0
         X_transformed = X_transformed[model_features]
         
         # Make prediction
-        result = detector.predict(X_transformed.values[0].tolist())
+        result = selected_detector.predict(X_transformed.values[0].tolist())
         
         return render_template('result.html', 
                              prediction=result['label'],
-                             probability=result['probability'])
+                             probability=result['probability'],
+                             model_used=model_param.upper())
     except Exception as e:
         import traceback
         print(f"Single sample error: {traceback.format_exc()}")
@@ -158,7 +214,9 @@ def predict_raw():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("=== UPLOAD STARTED ===")
+    print("=== UPLOAD STARTED ===", flush=True)
+    with open('/tmp/batch_debug.log', 'a') as f:
+        f.write("\n=== UPLOAD STARTED ===\n")
     if 'file' not in request.files:
         flash('No file selected')
         return redirect(url_for('index'))
@@ -167,6 +225,9 @@ def upload_file():
     if file.filename == '':
         flash('No file selected')
         return redirect(url_for('index'))
+    
+    # Get model selection
+    model_param = request.form.get('model', 'dt')
     
     if file and file.filename.endswith('.csv'):
         filename = secure_filename(file.filename)
@@ -192,6 +253,28 @@ def upload_file():
             # Detect if raw data (has raw field names) or preprocessed
             is_raw = any(field in df.columns for field in RAW_FIELDS[:5])
             
+            # Select model and features
+            if model_param == 'rf' and rf_available:
+                selected_detector = rf_detector
+                model_features = RF_FEATURE_NAMES
+            else:
+                selected_detector = dt_detector
+                model_features = DT_FEATURE_NAMES
+            
+            print(f"=== BATCH UPLOAD DEBUG ===")
+            print(f"File shape: {df.shape}")
+            print(f"Has Label: {has_labels}")
+            print(f"Is raw: {is_raw}")
+            print(f"Model: {model_param}")
+            print(f"Expected features: {len(model_features)}")
+            
+            with open('/tmp/batch_debug.log', 'a') as f:
+                f.write(f"\n=== BATCH UPLOAD ===\n")
+                f.write(f"Shape: {df.shape}\n")
+                f.write(f"Has Label: {has_labels}\n")
+                f.write(f"Is raw: {is_raw}\n")
+                f.write(f"Model: {model_param}\n")
+            
             if is_raw:
                 # Raw data - use preprocessing pipeline
                 if has_labels:
@@ -202,63 +285,53 @@ def upload_file():
                     df_features = df
                 
                 try:
-                    # Import and use the preprocessing classes
-                    transformer = DtPePreprocessorProvider.get_transformer()
-
-                    # Transform with same parameters as training
-                    # Process in batches and skip rows that fail
-                    successful_rows = []
-                    failed_indices = []
+                    # Use the mapper to preprocess (same as training)
+                    mapper = DtPePreprocessorProvider.get_mapper()
+                    X_transformed = mapper.map(df_features)
                     
-                    for idx in range(len(df_features)):
-                        try:
-                            row_df = df_features.iloc[idx:idx+1]
-                            X_row = transformer.transform(row_df)
-                            successful_rows.append(X_row)
-                        except Exception as row_error:
-                            failed_indices.append(idx)
-                            print(f"Row {idx} failed: {str(row_error)}")
-                            continue
+                    # For DT: Remove duplicate columns (mapper produces duplicate 'dll__')
+                    # For RF: Keep duplicates (model was trained with them)
+                    if model_param != 'rf':
+                        X_transformed = X_transformed.loc[:, ~X_transformed.columns.duplicated()]
                     
-                    if not successful_rows:
-                        flash('❌ All rows failed preprocessing. Please check your data format.')
-                        return redirect(url_for('index'))
-                    
-                    if failed_indices:
-                        flash(f'⚠️ Skipped {len(failed_indices)} rows that failed preprocessing')
-
-                    # Combine successful rows
-                    row_dfs = []
-
-                    for i, row_parts in enumerate(successful_rows):
-                        if (i + 1) % 100 == 0:
-                            print(f"Building row_dfs: {i + 1}/{len(successful_rows)}")
-
-                        row_df = pd.concat(row_parts, axis=1)
-                        row_dfs.append(row_df)
-                    X_transformed = pd.concat(row_dfs, ignore_index=True)
-                    
-                    # Update y to match successful rows
-                    if y is not None:
-                        y = y.drop(failed_indices).reset_index(drop=True)
+                    # Update y to match if preprocessing changed row count
+                    if y is not None and len(X_transformed) < len(y):
+                        y = y.iloc[:len(X_transformed)].reset_index(drop=True)
                     
                     # Align columns with model's expected features
-                    model_features = FEATURE_NAMES
-                    missing_cols = set(model_features) - set(X_transformed.columns)
+                    # For RF: sklearn requires exact feature count with duplicates
+                    # Use pandas iloc to match feature indices instead of dropping
+                    if model_param == 'rf':
+                        # RF expects all features in schema order, including duplicates
+                        # Create array with exact number of columns
+                        X_array = np.zeros((X_transformed.shape[0], len(model_features)))
+                        
+                        # Fill in available columns
+                        col_to_idx = {col: i for i, col in enumerate(X_transformed.columns)}
+                        for i, feature_name in enumerate(model_features):
+                            if feature_name in col_to_idx:
+                                X_array[:, i] = X_transformed.iloc[:, col_to_idx[feature_name]].values
+                        
+                        X_transformed = X_array
+                    else:
+                        # DT: Remove duplicates first, then align
+                        missing_cols = set(model_features) - set(X_transformed.columns)
+                        for col in missing_cols:
+                            X_transformed[col] = 0.0
+                        X_transformed = X_transformed[model_features]
                     
-                    # Add missing columns with zeros
-                    for col in missing_cols:
-                        X_transformed[col] = 0
-                    
-                    # Remove extra columns and reorder to match model
-                    X_transformed = X_transformed[model_features]
-                    
-                    # Debug: Check feature variance
+                    # Debug: Check feature count
                     print(f"Transformed shape: {X_transformed.shape}")
-                    print(f"Non-zero features: {(X_transformed != 0).sum().sum()}")
-                    print(f"Feature variance sample: {X_transformed.var().head(10).to_dict()}")
+                    print(f"Expected features: {len(model_features)}")
+                    print(f"Actual features: {X_transformed.shape[1]}")
                     
-                    predictions = detector.predict_batch(X_transformed.values.tolist())
+                    # Convert to list (handle both DataFrame and numpy array)
+                    if isinstance(X_transformed, np.ndarray):
+                        features_list = X_transformed.tolist()
+                    else:
+                        features_list = X_transformed.values.tolist()
+                    
+                    predictions = selected_detector.predict_batch(features_list)
                 except Exception as e:
                     import traceback
                     print(f"Full error: {traceback.format_exc()}")
@@ -273,7 +346,7 @@ def upload_file():
                     X = df
                     y = None
                 
-                predictions = detector.predict_batch(X.values.tolist())
+                predictions = selected_detector.predict_batch(X.values.tolist())
             
             # Calculate metrics if labels exist
             metrics = None
@@ -307,7 +380,8 @@ def upload_file():
             return render_template('batch_result.html', 
                                  predictions=predictions,
                                  metrics=metrics,
-                                 has_labels=has_labels)
+                                 has_labels=has_labels,
+                                 model_name=model_param.upper())
         
         except Exception as e:
             import traceback
@@ -340,6 +414,16 @@ def dt_visualization():
     """Serve decision tree visualization image"""
     from flask import send_file
     return send_file('models/decision_tree/decision_tree_model.jpg', mimetype='image/jpeg')
+
+@app.route('/model/rf/visualization')
+def rf_visualization():
+    """Serve pre-generated random forest feature importance visualization"""
+    from flask import send_file
+    try:
+        return send_file('models/random_forest/feature_importance.png', mimetype='image/png')
+    except Exception as e:
+        print(f"Error serving RF visualization: {e}")
+        return f"Error serving visualization: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)

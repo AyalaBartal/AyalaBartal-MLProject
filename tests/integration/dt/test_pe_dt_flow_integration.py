@@ -10,9 +10,9 @@ from src.specific.dt.evaluate.pe_dt_evaluator_provider import DtPeEvaluatorProvi
 from src.specific.dt.evaluate.pe_dt_evaluate_input_args import DtPeEvaluateInputArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_algo_args import DtPeEvaluateAlgoArgs
 from src.specific.dt.evaluate.pe_dt_evaluate_output_args import DtPeEvaluateOutputArgs
-from src.specific.dt.preprocess.pe_dt_preprocess_csv_args import DtPeDataPreprocessCsvArgs
-from src.specific.dt.preprocess.pe_dt_preprocessor_provider import DtPePreprocessorProvider
-from src.specific.dt.preprocess.pe_dt_csv_preprocessor import DtPeCsvPreprocessMapper
+from src.common.preprocessor import DtPeDataPreprocessCsvArgs
+from src.common.preprocessor import DtPePreprocessorProvider
+from src.common.preprocessor import DtPeCsvPreprocessMapper
 from src.specific.dt.trainer.pe_dt_train_algo_args import DtPeTrainAlgoArgs
 from src.specific.dt.trainer.pe_dt_train_report_args import DtPeTrainReportArgs
 from src.specific.dt.trainer.pe_dt_trainer_provider import DtPeTrainerProvider

@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from src.specific.dt.preprocess.count_dlls_column_transformer import CountDllsColumnTransformer
+from src.common.preprocessor import CountDllsColumnTransformer
 
 """
 Test CountDllsColumnTransformer.

@@ -2,19 +2,19 @@ import unittest
 from types import SimpleNamespace
 from typing import List
 
-from src.specific.dt.preprocess import ColumnTransformerMapProvider
-from src.specific.dt.preprocess.column_transformer_one_provider import ColumnTransformerOneProvider
-from src.specific.dt.preprocess.pe_dt_string_converter import DtPeStringConverter
-from src.specific.dt.preprocess.pe_dt_list_converter import DtPeListConverter
-from src.specific.dt.preprocess.pe_dt_data_frame_converter import DtPeDataFrameConverter
-from src.specific.dt.preprocess.multi_column_transformer import MultiColumnTransformer
-from src.specific.dt.preprocess.category_column_transformer import CategoryColumnTransformer
-from src.specific.dt.preprocess.characteristics_column_transformer import CharacteristicsColumnTransformer
-from src.specific.dt.preprocess.number_column_transformer import NumberColumnTransformer
-from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
-from src.specific.dt.preprocess.identify_column_transformer import IdentifyColumnTransformer
-from src.specific.dt.preprocess.first_date_column_transformer import FirstDateColumnTransformer
-from src.specific.dt.preprocess.compile_time_column_transformer import CompileTimeColumnTransformer
+from src.common.preprocessor import ColumnTransformerMapProvider
+from src.common.preprocessor.column_transformer_one_provider import ColumnTransformerOneProvider
+from src.common.preprocessor.pe_dt_string_converter import DtPeStringConverter
+from src.common.preprocessor.pe_dt_list_converter import DtPeListConverter
+from src.common.preprocessor.pe_dt_data_frame_converter import DtPeDataFrameConverter
+from src.common.preprocessor.multi_column_transformer import MultiColumnTransformer
+from src.common.preprocessor.category_column_transformer import CategoryColumnTransformer
+from src.common.preprocessor.characteristics_column_transformer import CharacteristicsColumnTransformer
+from src.common.preprocessor.number_column_transformer import NumberColumnTransformer
+from src.common.preprocessor.entropy_column_transformer import EntropyColumnTransformer
+from src.common.preprocessor.identify_column_transformer import IdentifyColumnTransformer
+from src.common.preprocessor.first_date_column_transformer import FirstDateColumnTransformer
+from src.common.preprocessor.compile_time_column_transformer import CompileTimeColumnTransformer
 
 
 class TestColumnTransformerMapProvider(unittest.TestCase):

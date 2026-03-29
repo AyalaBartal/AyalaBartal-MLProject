@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from src.specific.dt.preprocess.entropy_column_transformer import EntropyColumnTransformer
+from src.common.preprocessor import EntropyColumnTransformer
 
 """
 Test EntropyColumnTransformer.
