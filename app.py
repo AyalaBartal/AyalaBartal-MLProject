@@ -380,7 +380,8 @@ def upload_file():
             return render_template('batch_result.html', 
                                  predictions=predictions,
                                  metrics=metrics,
-                                 has_labels=has_labels)
+                                 has_labels=has_labels,
+                                 model_name=model_param.upper())
         
         except Exception as e:
             import traceback
