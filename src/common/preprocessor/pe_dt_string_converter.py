@@ -1,6 +1,7 @@
 import json
 import math
 import re
+import ast
 
 
 class DtPeStringConverter:
@@ -17,8 +18,17 @@ class DtPeStringConverter:
             return []
         # Case 3: value is a non-empty json: ["a","b"] or [1,2,3], [{"a":1}, {"b":2}]
         if text.startswith("[") and text.endswith("]"):
-            json_data = json.loads(text)
-            return [str(item) for item in json_data if item is not None]
+            try:
+                json_data = json.loads(text)
+                return [str(item) for item in json_data if item is not None]
+            except json.JSONDecodeError:
+                # Fallback: try Python literal (handles single quotes)
+                try:
+                    python_data = ast.literal_eval(text)
+                    if isinstance(python_data, (list, tuple)):
+                        return [str(item) for item in python_data if item is not None]
+                except (ValueError, SyntaxError):
+                    pass
         # Case 4: default fallback, split by common separators and filter out empty words
         words = re.split(r"[\s,;|]+", text)
         return [w for w in words if w]
