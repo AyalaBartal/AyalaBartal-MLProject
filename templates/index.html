@@ -308,17 +308,29 @@
                 
                 <div class="section">
                     <h2>📊 Batch Evaluation</h2>
-                    <p style="margin-bottom: 20px; color: #7f8c8d;">Upload CSV file for batch predictions</p>
-                    <form method="POST" action="/upload" enctype="multipart/form-data">
-                        <input type="hidden" name="model" value="rf">
-                        <div style="margin-bottom: 15px;">
-                            <input type="file" name="file" accept=".csv" required>
-                            <button type="submit" class="predict-btn">📤 Upload & Predict</button>
-                        </div>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Supports:</p>
+                    <ul style="margin-bottom: 15px; color: #7f8c8d; font-size: 0.95em;">
+                        <li><strong>Raw PE data:</strong> {{ raw_fields|length }} fields (Size, Entropy, ImportedDlls, etc.)</li>
+                        <li><strong>Preprocessed data:</strong> 424 features</li>
+                    </ul>
+                    <p style="margin-bottom: 15px; color: #27ae60; font-size: 0.9em;">
+                        ✓ Raw files will be automatically preprocessed
+                    </p>
+                    <div class="upload-area">
+                        <form method="POST" action="/upload" enctype="multipart/form-data">
+                            <input type="hidden" name="model" value="rf">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📤</div>
+                            <h3 style="margin-bottom: 15px; color: #2c3e50;">Upload CSV File</h3>
+                            <input type="file" name="file" accept=".csv" required class="file-input">
+                            <br>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">⚡</span>Process File
+                            </button>
+                        </form>
                         <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
                             📝 Include 'Label' column (0=Goodware, 1=Malware) for evaluation metrics.
                         </p>
-                    </form>
+                    </div>
                 </div>
             </div>
             {% endif %}
