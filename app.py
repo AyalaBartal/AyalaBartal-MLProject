@@ -214,7 +214,9 @@ def predict_raw():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("=== UPLOAD STARTED ===")
+    print("=== UPLOAD STARTED ===", flush=True)
+    with open('/tmp/batch_debug.log', 'a') as f:
+        f.write("\n=== UPLOAD STARTED ===\n")
     if 'file' not in request.files:
         flash('No file selected')
         return redirect(url_for('index'))
@@ -259,6 +261,20 @@ def upload_file():
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES
             
+            print(f"=== BATCH UPLOAD DEBUG ===")
+            print(f"File shape: {df.shape}")
+            print(f"Has Label: {has_labels}")
+            print(f"Is raw: {is_raw}")
+            print(f"Model: {model_param}")
+            print(f"Expected features: {len(model_features)}")
+            
+            with open('/tmp/batch_debug.log', 'a') as f:
+                f.write(f"\n=== BATCH UPLOAD ===\n")
+                f.write(f"Shape: {df.shape}\n")
+                f.write(f"Has Label: {has_labels}\n")
+                f.write(f"Is raw: {is_raw}\n")
+                f.write(f"Model: {model_param}\n")
+            
             if is_raw:
                 # Raw data - use preprocessing pipeline
                 if has_labels:
@@ -273,6 +289,10 @@ def upload_file():
                     mapper = DtPePreprocessorProvider.get_mapper()
                     X_transformed = mapper.map(df_features)
                     
+                    # IMPORTANT: Mapper sometimes produces duplicate columns (e.g., 'dll__' appears twice)
+                    # Remove duplicate columns, keeping only the first occurrence
+                    X_transformed = X_transformed.loc[:, ~X_transformed.columns.duplicated()]
+                    
                     # Update y to match if preprocessing changed row count
                     if y is not None and len(X_transformed) < len(y):
                         y = y.iloc[:len(X_transformed)].reset_index(drop=True)
@@ -282,7 +302,7 @@ def upload_file():
                     
                     # Add missing columns with zeros
                     for col in missing_cols:
-                        X_transformed[col] = 0
+                        X_transformed[col] = 0.0
                     
                     # Remove extra columns and reorder to match model
                     X_transformed = X_transformed[model_features]
@@ -386,4 +406,4 @@ def rf_visualization():
         return f"Error serving visualization: {str(e)}", 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5555)
