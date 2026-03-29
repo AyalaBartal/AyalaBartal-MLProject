@@ -406,5 +406,54 @@ def dt_visualization():
     from flask import send_file
     return send_file('models/decision_tree/decision_tree_model.jpg', mimetype='image/jpeg')
 
+@app.route('/model/rf/visualization')
+def rf_visualization():
+    """Generate and serve random forest feature importance visualization"""
+    import matplotlib.pyplot as plt
+    import io
+    import pandas as pd
+    
+    try:
+        # Load feature importance
+        importance_df = pd.read_csv('models/random_forest/feature_importance.csv')
+        
+        # Get top 20 features
+        top_20 = importance_df.head(20)
+        
+        # Create figure
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        # Create horizontal bar plot
+        ax.barh(range(len(top_20)), top_20['importance'], color='#2ecc71')
+        ax.set_yticks(range(len(top_20)))
+        ax.set_yticklabels(top_20['feature'], fontsize=10)
+        ax.set_xlabel('Feature Importance', fontsize=12, fontweight='bold')
+        ax.set_title('Random Forest - Top 20 Most Important Features', fontsize=14, fontweight='bold', pad=20)
+        
+        # Invert y-axis so most important is at top
+        ax.invert_yaxis()
+        
+        # Add grid
+        ax.grid(axis='x', alpha=0.3, linestyle='--')
+        
+        # Add values on bars
+        for i, v in enumerate(top_20['importance']):
+            ax.text(v, i, f' {v:.4f}', va='center', fontsize=9)
+        
+        plt.tight_layout()
+        
+        # Save to bytes
+        img_io = io.BytesIO()
+        plt.savefig(img_io, format='png', dpi=100, bbox_inches='tight')
+        img_io.seek(0)
+        plt.close()
+        
+        from flask import send_file as send_file_direct
+        return send_file_direct(img_io, mimetype='image/png')
+    except Exception as e:
+        print(f"Error generating RF visualization: {e}")
+        # Return a placeholder image or error message
+        return f"Error generating visualization: {str(e)}", 500
+
 if __name__ == '__main__':
     app.run(debug=True)

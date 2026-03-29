@@ -263,7 +263,21 @@
             {% if rf_available %}
             <div id="rf-tab" class="tab-content">
                 <div class="section">
-                    <h2>📊 Model Information</h2>
+                    <h2>📊 Model Visualization</h2>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Top 20 most important features (click to view full size):</p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="/model/rf/visualization" target="_blank">
+                            <img src="/model/rf/visualization" alt="Random Forest Feature Importance" 
+                                 style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer;">
+                        </a>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.9em;">
+                            🔍 Click image to open in new tab for detailed view
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>ℹ️ Model Information</h2>
                     <p style="margin-bottom: 15px; color: #7f8c8d;">Random Forest Ensemble (100 trees, max_depth=20)</p>
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                         <strong>Performance (10-fold CV):</strong><br>
