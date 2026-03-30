@@ -1,0 +1,30 @@
+{
+  "cv_auc_mean": 0.9342105290451735,
+  "cv_auc_std": 0.002231544047605491,
+  "cv_accuracy_mean": 0.8739042663171117,
+  "cv_accuracy_std": 0.02079831822448764,
+  "test_auc": 0.8931143997388299,
+  "test_accuracy": 0.8845272491780413,
+  "confusion_matrix": [
+    [
+      3714,
+      510
+    ],
+    [
+      649,
+      5164
+    ]
+  ],
+  "architecture": {
+    "input_size": 423,
+    "hidden_sizes": [
+      128,
+      64,
+      32
+    ],
+    "dropout": 0.3,
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "loss_function": "BCELoss"
+  }
+}
