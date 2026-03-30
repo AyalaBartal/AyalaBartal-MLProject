@@ -10,11 +10,11 @@ from src.specific.rf.evaluate.pe_rf_evaluator_provider import RfPeEvaluatorProvi
 from src.specific.rf.evaluate.pe_rf_evaluate_input_args import RfPeEvaluateInputArgs
 from src.specific.rf.evaluate.pe_rf_evaluate_algo_args import RfPeEvaluateAlgoArgs
 from src.specific.rf.evaluate.pe_rf_evaluate_output_args import RfPeEvaluateOutputArgs
-from src.common.preprocessor import RfPeDataPreprocessCsvArgs
-from src.common.preprocessor import RfPePreprocessorProvider
-from src.common.preprocessor import RfPeCsvPreprocessMapper
+from src.common.preprocessor import DtPeDataPreprocessCsvArgs
+from src.common.preprocessor import DtPePreprocessorProvider
+from src.common.preprocessor import DtPeCsvPreprocessMapper
 from src.specific.rf.trainer.pe_rf_train_algo_args import RfPeTrainAlgoArgs
-from src.specific.rf.trainer.pe_rf_train_args import RfPeTrainReportArgs
+from src.specific.rf.trainer.pe_rf_train_args import RfPeTrainArgs
 from src.specific.rf.trainer.pe_rf_trainer_provider import RfPeTrainerProvider
 from tests.integration.rf.pe_rf_state_provider import RfPeTestStateProvider
 from tests.utils.paths_provider import PathsProvider
@@ -79,15 +79,15 @@ class TestRfPeIntegration(unittest.TestCase):
 
     def test_03_preprocessor(self):
         print("Start test_03_preprocessor")
-        args = RfPeDataPreprocessCsvArgs(self.state.output_clean_csv_file, self.state.output_preprocess_csv_file)
-        rf_pe_csv_preprocessor = RfPeCsvPreprocessMapper(RfPePreprocessorProvider.get_mapper())
+        args = DtPeDataPreprocessCsvArgs(self.state.output_clean_csv_file, self.state.output_preprocess_csv_file)
+        rf_pe_csv_preprocessor = DtPeCsvPreprocessMapper(DtPePreprocessorProvider.get_mapper())
         rf_pe_csv_preprocessor.map(args)
         print("End success test_03_preprocessor")
 
     def test_04_trainer(self):
         print("Start test_04_trainer")
         algo_args = RfPeTrainAlgoArgs()
-        report_args = RfPeTrainReportArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
+        report_args = RfPeTrainArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
         io_trainer = RfPeTrainerProvider.get_io_trainer()
         io_trainer.train(algo_args, report_args)
         print("End success test_04_trainer")

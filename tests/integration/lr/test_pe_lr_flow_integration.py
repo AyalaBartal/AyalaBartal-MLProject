@@ -10,11 +10,11 @@ from src.specific.lr.evaluate.pe_lr_evaluator_provider import LrPeEvaluatorProvi
 from src.specific.lr.evaluate.pe_lr_evaluate_input_args import LrPeEvaluateInputArgs
 from src.specific.lr.evaluate.pe_lr_evaluate_algo_args import LrPeEvaluateAlgoArgs
 from src.specific.lr.evaluate.pe_lr_evaluate_output_args import LrPeEvaluateOutputArgs
-from src.common.preprocessor import LrPeDataPreprocessCsvArgs
-from src.common.preprocessor import LrPePreprocessorProvider
-from src.common.preprocessor import LrPeCsvPreprocessMapper
+from src.common.preprocessor import DtPeDataPreprocessCsvArgs
+from src.common.preprocessor import DtPePreprocessorProvider
+from src.common.preprocessor import DtPeCsvPreprocessMapper
 from src.specific.lr.trainer.pe_lr_train_algo_args import LrPeTrainAlgoArgs
-from src.specific.lr.trainer.pe_lr_train_args import LrPeTrainReportArgs
+from src.specific.lr.trainer.pe_lr_train_args import LrPeTrainArgs
 from src.specific.lr.trainer.pe_lr_trainer_provider import LrPeTrainerProvider
 from tests.integration.lr.pe_lr_state_provider import LrPeTestStateProvider
 from tests.utils.paths_provider import PathsProvider
@@ -79,15 +79,15 @@ class TestLrPeIntegration(unittest.TestCase):
 
     def test_03_preprocessor(self):
         print("Start test_03_preprocessor")
-        args = LrPeDataPreprocessCsvArgs(self.state.output_clean_csv_file, self.state.output_preprocess_csv_file)
-        lr_pe_csv_preprocessor = LrPeCsvPreprocessMapper(LrPePreprocessorProvider.get_mapper())
+        args = DtPeDataPreprocessCsvArgs(self.state.output_clean_csv_file, self.state.output_preprocess_csv_file)
+        lr_pe_csv_preprocessor = DtPeCsvPreprocessMapper(DtPePreprocessorProvider.get_mapper())
         lr_pe_csv_preprocessor.map(args)
         print("End success test_03_preprocessor")
 
     def test_04_trainer(self):
         print("Start test_04_trainer")
         algo_args = LrPeTrainAlgoArgs()
-        report_args = LrPeTrainReportArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
+        report_args = LrPeTrainArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
         io_trainer = LrPeTrainerProvider.get_io_trainer()
         io_trainer.train(algo_args, report_args)
         print("End success test_04_trainer")
