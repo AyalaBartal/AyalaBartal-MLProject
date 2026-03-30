@@ -6,21 +6,21 @@ import pandas as pd
 from src.common.csv.feature_index_provider import CsvBrazilianProvider
 from src.common.csv.csv_io_validate import CsvIoValidate
 from src.common.precleanup.pe_preprocess_cleaner import PePreprocessCleaner
-from src.specific.rf.evaluate.pe_rf_evaluator_provider import RfPeEvaluatorProvider
-from src.specific.rf.evaluate.pe_rf_evaluate_input_args import RfPeEvaluateInputArgs
-from src.specific.rf.evaluate.pe_rf_evaluate_algo_args import RfPeEvaluateAlgoArgs
-from src.specific.rf.evaluate.pe_rf_evaluate_output_args import RfPeEvaluateOutputArgs
+from src.specific.lr.evaluate.pe_lr_evaluator_provider import LrPeEvaluatorProvider
+from src.specific.lr.evaluate.pe_lr_evaluate_input_args import LrPeEvaluateInputArgs
+from src.specific.lr.evaluate.pe_lr_evaluate_algo_args import LrPeEvaluateAlgoArgs
+from src.specific.lr.evaluate.pe_lr_evaluate_output_args import LrPeEvaluateOutputArgs
 from src.common.preprocessor import DtPeDataPreprocessCsvArgs
 from src.common.preprocessor import DtPePreprocessorProvider
 from src.common.preprocessor import DtPeCsvPreprocessMapper
-from src.specific.rf.trainer.pe_rf_train_algo_args import RfPeTrainAlgoArgs
-from src.specific.rf.trainer.pe_rf_train_args import RfPeTrainArgs
-from src.specific.rf.trainer.pe_rf_trainer_provider import RfPeTrainerProvider
-from tests.integration.rf.pe_rf_state_provider import RfPeTestStateProvider
+from src.specific.lr.trainer.pe_lr_train_algo_args import LrPeTrainAlgoArgs
+from src.specific.lr.trainer.pe_lr_train_args import LrPeTrainArgs
+from src.specific.lr.trainer.pe_lr_trainer_provider import LrPeTrainerProvider
+from tests.integration.lr.pe_lr_state_provider import LrPeTestStateProvider
 from tests.utils.paths_provider import PathsProvider
 
 """
-Ordered integration test for ML random-forest flow.
+Ordered integration test for ML logistic-regression flow.
 
 Flow:
 1. input validation
@@ -40,7 +40,7 @@ Notes:
 
 
 @unittest.skip("Skip the entire test class until the data input/output and environment variable issues are resolved")
-class TestRfPeIntegration(unittest.TestCase):
+class TestLrPeIntegration(unittest.TestCase):
 
     start_time = 0
     state = None
@@ -50,7 +50,7 @@ class TestRfPeIntegration(unittest.TestCase):
     def setUpClass(cls):
         cls.start_time = time.perf_counter()
         data_dir = PathsProvider.get_test_data_dir()
-        cls.state = RfPeTestStateProvider.get_state(data_dir)
+        cls.state = LrPeTestStateProvider.get_state(data_dir)
 
         cls.columns_provider = CsvBrazilianProvider()
         print("Start test {} with state {}".format(cls.__class__.__name__, cls.state))
@@ -80,30 +80,30 @@ class TestRfPeIntegration(unittest.TestCase):
     def test_03_preprocessor(self):
         print("Start test_03_preprocessor")
         args = DtPeDataPreprocessCsvArgs(self.state.output_clean_csv_file, self.state.output_preprocess_csv_file)
-        rf_pe_csv_preprocessor = DtPeCsvPreprocessMapper(DtPePreprocessorProvider.get_mapper())
-        rf_pe_csv_preprocessor.map(args)
+        lr_pe_csv_preprocessor = DtPeCsvPreprocessMapper(DtPePreprocessorProvider.get_mapper())
+        lr_pe_csv_preprocessor.map(args)
         print("End success test_03_preprocessor")
 
     def test_04_trainer(self):
         print("Start test_04_trainer")
-        algo_args = RfPeTrainAlgoArgs()
-        report_args = RfPeTrainArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
-        io_trainer = RfPeTrainerProvider.get_io_trainer()
+        algo_args = LrPeTrainAlgoArgs()
+        report_args = LrPeTrainArgs(self.state.output_preprocess_csv_file, self.state.output_train_dir_path)
+        io_trainer = LrPeTrainerProvider.get_io_trainer()
         io_trainer.train(algo_args, report_args)
         print("End success test_04_trainer")
 
     def test_05_evaluate(self):
         print("Start test_05_evaluate")
-        input_args = RfPeEvaluateInputArgs(self.state.output_train_dir_path)
+        input_args = LrPeEvaluateInputArgs(self.state.output_train_dir_path)
         # The input csv is not the original input but the input after clean and reprocess.
         input_args.input_csv = self.state.output_preprocess_csv_file
         # The model from the training
         input_args.input_model = self.state.output_model_file
 
-        algo_args = RfPeEvaluateAlgoArgs()
-        output_args = RfPeEvaluateOutputArgs(self.state.output_evaluate_dir_path)
+        algo_args = LrPeEvaluateAlgoArgs()
+        output_args = LrPeEvaluateOutputArgs(self.state.output_evaluate_dir_path)
 
-        provider = RfPeEvaluatorProvider()
+        provider = LrPeEvaluatorProvider()
         evaluator = provider.get_evaluator()
 
         evaluator.evaluate(input_args, algo_args, output_args)
@@ -112,11 +112,11 @@ class TestRfPeIntegration(unittest.TestCase):
 
 def suite():
     test_suite = unittest.TestSuite()
-    test_suite.addTest(TestRfPeIntegration("test_01_input_validation"))
-    test_suite.addTest(TestRfPeIntegration("test_02_input_cleanup"))
-    test_suite.addTest(TestRfPeIntegration("test_03_preprocessor"))
-    test_suite.addTest(TestRfPeIntegration("test_04_trainer"))
-    test_suite.addTest(TestRfPeIntegration("test_05_evaluate"))
+    test_suite.addTest(TestLrPeIntegration("test_01_input_validation"))
+    test_suite.addTest(TestLrPeIntegration("test_02_input_cleanup"))
+    test_suite.addTest(TestLrPeIntegration("test_03_preprocessor"))
+    test_suite.addTest(TestLrPeIntegration("test_04_trainer"))
+    test_suite.addTest(TestLrPeIntegration("test_05_evaluate"))
     return test_suite
 
 

@@ -49,6 +49,17 @@ try:
 except Exception as e:
     print(f"Warning: RF model not available: {e}")
 
+lr_detector = None
+lr_available = False
+try:
+    lr_detector = MalwareDetector(
+        'models/logistic_regression/logistic_regression_model.joblib',
+        transformer_path=None  # LR doesn't use sklearn transformer
+    )
+    lr_available = True
+except Exception as e:
+    print(f"Warning: LR model not available: {e}")
+
 # Default to DT, will be overridden by model parameter in routes
 detector = dt_detector
 
@@ -66,6 +77,16 @@ if rf_available:
             RF_FEATURE_NAMES = rf_schema['feature_order']
     except Exception as e:
         print(f"Warning: RF feature schema not found: {e}")
+
+# Load LR feature names if available
+LR_FEATURE_NAMES = None
+if lr_available:
+    try:
+        with open('models/logistic_regression/lr_feature_schema.json', 'r') as f:
+            lr_schema = json.load(f)
+            LR_FEATURE_NAMES = lr_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: LR feature schema not found: {e}")
 
 # Default to DT features
 FEATURE_NAMES = DT_FEATURE_NAMES
@@ -119,7 +140,8 @@ def index():
                          feature_names=FEATURE_NAMES,
                          raw_fields=RAW_FIELDS,
                          raw_demo_data=RAW_DEMO_DATA,
-                         rf_available=rf_available)
+                         rf_available=rf_available,
+                         lr_available=lr_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -131,6 +153,9 @@ def predict():
         if model_param == 'rf' and rf_available:
             selected_detector = rf_detector
             selected_features = RF_FEATURE_NAMES
+        elif model_param == 'lr' and lr_available:
+            selected_detector = lr_detector
+            selected_features = LR_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             selected_features = DT_FEATURE_NAMES
@@ -190,6 +215,9 @@ def predict_raw():
         if model_param == 'rf' and rf_available:
             selected_detector = rf_detector
             model_features = RF_FEATURE_NAMES
+        elif model_param == 'lr' and lr_available:
+            selected_detector = lr_detector
+            model_features = LR_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             model_features = DT_FEATURE_NAMES
@@ -257,6 +285,9 @@ def upload_file():
             if model_param == 'rf' and rf_available:
                 selected_detector = rf_detector
                 model_features = RF_FEATURE_NAMES
+            elif model_param == 'lr' and lr_available:
+                selected_detector = lr_detector
+                model_features = LR_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES

@@ -34,18 +34,20 @@ with open('models/random_forest/rf_feature_schema.json') as f:
     model_features = json.load(f)['feature_order']
 print(f"   Schema has {len(model_features)} features")
 
-# Align features
-missing_cols = set(model_features) - set(X_transformed.columns)
-for col in missing_cols:
-    X_transformed[col] = 0
+# Align features using numpy array (handles duplicate column names)
+col_to_idx = {col: i for i, col in enumerate(X_transformed.columns)}
+X_array = np.zeros((X_transformed.shape[0], len(model_features)))
+for i, feature_name in enumerate(model_features):
+    if feature_name in col_to_idx:
+        X_array[:, i] = X_transformed.iloc[:, col_to_idx[feature_name]].values
 
-X_aligned = X_transformed[model_features]
+X_aligned = X_array
 print(f"   After alignment: {X_aligned.shape}")
 
 # Make predictions
 print("\n4. Making RF predictions...")
 rf_detector = MalwareDetector('models/random_forest/random_forest_model.joblib', transformer_path=None)
-predictions = rf_detector.predict_batch(X_aligned.values.tolist())
+predictions = rf_detector.predict_batch(X_aligned.tolist())
 
 preds = np.array([p['prediction'] for p in predictions])
 proba = np.array([p['probability']['malware'] for p in predictions])
