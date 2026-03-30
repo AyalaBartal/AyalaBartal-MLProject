@@ -60,6 +60,17 @@ try:
 except Exception as e:
     print(f"Warning: LR model not available: {e}")
 
+ml_detector = None
+ml_available = False
+try:
+    ml_detector = MalwareDetector(
+        'models/pytorch_mlp/pytorch_mlp_model.pt',
+        transformer_path=None  # PyTorch model is self-contained
+    )
+    ml_available = True
+except Exception as e:
+    print(f"Warning: PyTorch MLP model not available: {e}")
+
 # Default to DT, will be overridden by model parameter in routes
 detector = dt_detector
 
@@ -87,6 +98,16 @@ if lr_available:
             LR_FEATURE_NAMES = lr_schema['feature_order']
     except Exception as e:
         print(f"Warning: LR feature schema not found: {e}")
+
+# Load ML (PyTorch) feature names if available
+ML_FEATURE_NAMES = None
+if ml_available:
+    try:
+        with open('models/pytorch_mlp/ml_feature_schema.json', 'r') as f:
+            ml_schema = json.load(f)
+            ML_FEATURE_NAMES = ml_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: ML feature schema not found: {e}")
 
 # Default to DT features
 FEATURE_NAMES = DT_FEATURE_NAMES
@@ -141,7 +162,8 @@ def index():
                          raw_fields=RAW_FIELDS,
                          raw_demo_data=RAW_DEMO_DATA,
                          rf_available=rf_available,
-                         lr_available=lr_available)
+                         lr_available=lr_available,
+                         ml_available=ml_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -156,6 +178,9 @@ def predict():
         elif model_param == 'lr' and lr_available:
             selected_detector = lr_detector
             selected_features = LR_FEATURE_NAMES
+        elif model_param == 'ml' and ml_available:
+            selected_detector = ml_detector
+            selected_features = ML_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             selected_features = DT_FEATURE_NAMES
@@ -218,6 +243,9 @@ def predict_raw():
         elif model_param == 'lr' and lr_available:
             selected_detector = lr_detector
             model_features = LR_FEATURE_NAMES
+        elif model_param == 'ml' and ml_available:
+            selected_detector = ml_detector
+            model_features = ML_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             model_features = DT_FEATURE_NAMES
@@ -288,6 +316,9 @@ def upload_file():
             elif model_param == 'lr' and lr_available:
                 selected_detector = lr_detector
                 model_features = LR_FEATURE_NAMES
+            elif model_param == 'ml' and ml_available:
+                selected_detector = ml_detector
+                model_features = ML_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES
