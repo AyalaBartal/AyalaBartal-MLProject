@@ -213,9 +213,9 @@ print(f"     False Neg: {cm[1,0]:6d}  |  True Pos:  {cm[1,1]:6d}")
 print("\n6. Saving model and metadata...")
 os.makedirs('models/pytorch_mlp', exist_ok=True)
 
-# Save model with joblib for compatibility with MalwareDetector
-dump(final_model, 'models/pytorch_mlp/pytorch_mlp_model.joblib')
-print("   ✓ Saved model to models/pytorch_mlp/pytorch_mlp_model.joblib")
+# Save model with PyTorch format
+torch.save(final_model.state_dict(), 'models/pytorch_mlp/pytorch_mlp_model.pt')
+print("   ✓ Saved model to models/pytorch_mlp/pytorch_mlp_model.pt")
 
 # Also save scaler
 dump(scaler, 'models/pytorch_mlp/pytorch_mlp_scaler.joblib')

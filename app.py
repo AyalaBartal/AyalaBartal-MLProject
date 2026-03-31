@@ -65,6 +65,7 @@ ml_available = False
 try:
     ml_detector = MalwareDetector(
         'models/pytorch_mlp/pytorch_mlp_model.pt',
+        scaler_path='models/pytorch_mlp/pytorch_mlp_scaler.joblib',
         transformer_path=None  # PyTorch model is self-contained
     )
     ml_available = True

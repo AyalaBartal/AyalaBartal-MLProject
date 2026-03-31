@@ -26,6 +26,18 @@ class MalwareDetector:
                 try:
                     import torch
                     import torch.nn as nn
+                    import json
+                    
+                    # Load feature schema to get correct input size
+                    model_dir = os.path.dirname(model_path)
+                    schema_path = os.path.join(model_dir, 'ml_feature_schema.json')
+                    input_size = 423  # Default
+                    self.feature_order = None
+                    if os.path.exists(schema_path):
+                        with open(schema_path, 'r') as f:
+                            schema = json.load(f)
+                            input_size = len(schema.get('feature_order', []))
+                            self.feature_order = schema.get('feature_order')
                     
                     # Define model class
                     class MalwareMLP(nn.Module):
@@ -46,7 +58,7 @@ class MalwareDetector:
                             return self.network(x)
                     
                     # Load model state
-                    self.model = MalwareMLP(423)
+                    self.model = MalwareMLP(input_size)
                     self.model.load_state_dict(torch.load(model_path))
                     self.model.eval()
                     self.device = 'cpu'
