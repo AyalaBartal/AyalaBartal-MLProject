@@ -19,8 +19,58 @@ sys.path.insert(0, os.path.join(current_dir, '..'))
 class MalwareDetector:
     def __init__(self, model_path=None, scaler_path=None, transformer_path=None):
         if model_path:
-            self.model = joblib.load(model_path)
-            self.scaler = joblib.load(scaler_path) if scaler_path else None
+            self.model_type = 'pytorch' if model_path.endswith('.pt') else 'sklearn'
+            
+            if self.model_type == 'pytorch':
+                # Load PyTorch model
+                try:
+                    import torch
+                    import torch.nn as nn
+                    import json
+                    
+                    # Load feature schema to get correct input size
+                    model_dir = os.path.dirname(model_path)
+                    schema_path = os.path.join(model_dir, 'ml_feature_schema.json')
+                    input_size = 423  # Default
+                    self.feature_order = None
+                    if os.path.exists(schema_path):
+                        with open(schema_path, 'r') as f:
+                            schema = json.load(f)
+                            input_size = len(schema.get('feature_order', []))
+                            self.feature_order = schema.get('feature_order')
+                    
+                    # Define model class
+                    class MalwareMLP(nn.Module):
+                        def __init__(self, input_size, hidden_sizes=[128, 64, 32], dropout=0.3):
+                            super(MalwareMLP, self).__init__()
+                            layers = []
+                            prev_size = input_size
+                            for hidden_size in hidden_sizes:
+                                layers.append(nn.Linear(prev_size, hidden_size))
+                                layers.append(nn.ReLU())
+                                layers.append(nn.Dropout(dropout))
+                                prev_size = hidden_size
+                            layers.append(nn.Linear(prev_size, 1))
+                            layers.append(nn.Sigmoid())
+                            self.network = nn.Sequential(*layers)
+                        
+                        def forward(self, x):
+                            return self.network(x)
+                    
+                    # Load model state
+                    self.model = MalwareMLP(input_size)
+                    self.model.load_state_dict(torch.load(model_path))
+                    self.model.eval()
+                    self.device = 'cpu'
+                except Exception as e:
+                    raise RuntimeError(f"Failed to load PyTorch model: {e}")
+                
+                # Load scaler
+                self.scaler = joblib.load(scaler_path) if scaler_path else None
+            else:
+                # Load sklearn model
+                self.model = joblib.load(model_path)
+                self.scaler = joblib.load(scaler_path) if scaler_path else None
             
             # Load transformer if path provided, otherwise create new one
             if transformer_path and os.path.exists(transformer_path):
@@ -29,6 +79,7 @@ class MalwareDetector:
                 self.transformer = DtPePreprocessorProvider.get_transformer()
         else:
             # Create dummy model for development
+            self.model_type = 'sklearn'
             self.model = RandomForestClassifier(random_state=42)
             self.scaler = StandardScaler()
             self.transformer = None
@@ -65,17 +116,34 @@ class MalwareDetector:
         if self.scaler:
             features = self.scaler.transform(features)
         
-        prediction = self.model.predict(features)[0]
-        probability = self.model.predict_proba(features)[0]
-        
-        return {
-            'prediction': int(prediction),
-            'label': 'Malware' if prediction == 1 else 'Goodware',
-            'probability': {
-                'goodware': float(probability[0]),
-                'malware': float(probability[1])
+        if self.model_type == 'pytorch':
+            import torch
+            with torch.no_grad():
+                X = torch.FloatTensor(features).to(self.device)
+                output = self.model(X).cpu().numpy().flatten()
+                probability = output[0]
+                prediction = int(probability > 0.5)
+            
+            return {
+                'prediction': prediction,
+                'label': 'Malware' if prediction == 1 else 'Goodware',
+                'probability': {
+                    'goodware': float(1 - probability),
+                    'malware': float(probability)
+                }
             }
-        }
+        else:
+            prediction = self.model.predict(features)[0]
+            probability = self.model.predict_proba(features)[0]
+            
+            return {
+                'prediction': int(prediction),
+                'label': 'Malware' if prediction == 1 else 'Goodware',
+                'probability': {
+                    'goodware': float(probability[0]),
+                    'malware': float(probability[1])
+                }
+            }
     
     def predict_raw(self, raw_data_dict):
         """Make prediction from raw PE file features"""
@@ -90,20 +158,39 @@ class MalwareDetector:
         if self.scaler:
             features = self.scaler.transform(features)
         
-        predictions = self.model.predict(features)
-        probabilities = self.model.predict_proba(features)
-        
-        results = []
-        for i, pred in enumerate(predictions):
-            results.append({
-                'prediction': int(pred),
-                'label': 'Malware' if pred == 1 else 'Goodware',
-                'probability': {
-                    'goodware': float(probabilities[i][0]),
-                    'malware': float(probabilities[i][1])
-                }
-            })
-        return results
+        if self.model_type == 'pytorch':
+            import torch
+            with torch.no_grad():
+                X = torch.FloatTensor(features).to(self.device)
+                outputs = self.model(X).cpu().numpy().flatten()
+            
+            results = []
+            for prob in outputs:
+                pred = int(prob > 0.5)
+                results.append({
+                    'prediction': pred,
+                    'label': 'Malware' if pred == 1 else 'Goodware',
+                    'probability': {
+                        'goodware': float(1 - prob),
+                        'malware': float(prob)
+                    }
+                })
+            return results
+        else:
+            predictions = self.model.predict(features)
+            probabilities = self.model.predict_proba(features)
+            
+            results = []
+            for i, pred in enumerate(predictions):
+                results.append({
+                    'prediction': int(pred),
+                    'label': 'Malware' if pred == 1 else 'Goodware',
+                    'probability': {
+                        'goodware': float(probabilities[i][0]),
+                        'malware': float(probabilities[i][1])
+                    }
+                })
+            return results
     
     def predict_batch_raw(self, raw_data_list):
         """Make predictions from raw PE file features"""
