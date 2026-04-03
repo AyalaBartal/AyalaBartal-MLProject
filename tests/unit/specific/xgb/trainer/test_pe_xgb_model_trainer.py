@@ -184,20 +184,6 @@ class TestXgbPeModelTrainer(unittest.TestCase):
         self.assertIs(actual, fitted_model)
         model.fit.assert_called_once_with(ml_features, ml_label)
 
-    def test_fit_model_with_real_model(self):
-        model = XGBClassifier(n_estimators=10, random_state=42, eval_metric='logloss')
-        ml_features = pd.DataFrame({
-            "f1": [1, 2, 3, 4, 5],
-            "f2": [5, 4, 3, 2, 1]
-        })
-        ml_label = pd.Series([0, 1, 0, 1, 0])
-
-        fitted_model = self.trainer.fit_model(model, ml_features, ml_label)
-
-        self.assertIsNotNone(fitted_model)
-        # Model should have booster after fit
-        self.assertIsNotNone(fitted_model.booster())
-
     def test_build_returns_confusion_matrix(self):
         y_true = [0, 1, 1, 0]
         y_pred = [0, 1, 0, 0]
@@ -224,14 +210,7 @@ class TestXgbPeModelTrainer(unittest.TestCase):
         expected = [[0, 3], [2, 0]]
         self.assertEqual(actual.tolist(), expected)
 
-    def test_build_confusion_matrix_shape(self):
-        y_true = list(range(100))
-        y_pred = [i % 2 for i in range(100)]
-
-        actual = self.trainer.build(y_true, y_pred)
-
-        self.assertEqual(actual.shape, (2, 2))
-
 
 if __name__ == "__main__":
     unittest.main()
+

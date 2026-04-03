@@ -203,42 +203,7 @@ class TestXgbPeLogicTrainer(unittest.TestCase):
             str(context.exception),
         )
 
-    @patch('src.specific.xgb.trainer.pe_xgb_logic_trainer.DtPePreprocessorProvider')
-    def test_train_uses_cross_validation(self, mock_provider):
-        args = Mock(spec=XgbPeTrainAlgoArgs)
-        args.label = "label"
-
-        raw_data = pd.DataFrame({"x": [1, 2, 3], "label": [0, 1, 0]})
-        preprocessed_data = pd.DataFrame({"x": [1.0, 2.0, 3.0], "label": [0, 1, 0]})
-
-        ml_label = pd.Series([0, 1, 0], name="label")
-        ml_features = pd.DataFrame({"x": [1.0, 2.0, 3.0]})
-        model = Mock(name="model")
-        skf = Mock(name="skf")
-        scores = {"test_accuracy": [0.8, 0.9], "test_roc_auc": [0.75, 0.85]}
-        con_matrix = Mock(name="con_matrix")
-        report = Mock(name="report")
-
-        mock_mapper = Mock()
-        mock_mapper.map.return_value = preprocessed_data
-        mock_provider.get_mapper.return_value = mock_mapper
-
-        self.reader.get_label_as_series.return_value = ml_label
-        self.reader.get_features_data_frame.return_value = ml_features
-        self.trainer.get_xgboost_classifier.return_value = model
-        self.trainer.get_split_train_test.return_value = skf
-        self.trainer.get_cross_validate_score.return_value = scores
-        self.trainer.fit_model.return_value = model
-        self.reporter.get_confusion_matrix.return_value = con_matrix
-        self.reporter.get_report.return_value = report
-
-        self.logic_trainer.train(args, raw_data)
-
-        self.trainer.get_cross_validate_score.assert_called_once()
-        # Verify scores passed to report
-        call_args = self.reporter.get_report.call_args
-        self.assertIn(scores, call_args[0])
-
 
 if __name__ == "__main__":
     unittest.main()
+

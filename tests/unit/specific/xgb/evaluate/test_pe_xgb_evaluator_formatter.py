@@ -9,7 +9,7 @@ from src.specific.xgb.evaluate.pe_xgb_evaluate_report import XgbPeEvaluateReport
 class TestXgbPeEvaluatorFormatter(unittest.TestCase):
 
     def test_get_json_from_report_threshold_returns_dict(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -17,7 +17,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIsInstance(actual, dict)
 
     def test_get_json_from_report_threshold_contains_auc(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -26,7 +26,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertAlmostEqual(actual["auc"], 0.92, places=5)
 
     def test_get_json_from_report_threshold_contains_accuracy(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -35,7 +35,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertAlmostEqual(actual["accuracy"], 0.88, places=5)
 
     def test_get_json_from_report_threshold_contains_threshold(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.7
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -44,7 +44,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertEqual(actual["threshold"], 0.7)
 
     def test_get_json_from_report_threshold_contains_confusion_matrix(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -52,7 +52,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIn("confusion_matrix", actual)
 
     def test_get_json_from_report_threshold_with_different_values(self):
-        report = XgbPeEvaluateReport(auc=0.75, acc=0.80, cm=[[5, 3], [2, 10]])
+        report = XgbPeEvaluateReport(auc=0.75, acc=0.80, cm=np.array([[5, 3], [2, 10]]))
         threshold = 0.6
 
         actual = XgbPeEvaluatorFormatter.get_json_from_report_threshold(report, threshold)
@@ -62,7 +62,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertEqual(actual["threshold"], 0.6)
 
     def test_get_md_from_report_threshold_returns_string(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
@@ -70,7 +70,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIsInstance(actual, str)
 
     def test_get_md_from_report_threshold_contains_auc(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
@@ -79,7 +79,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIn("0.92", actual)
 
     def test_get_md_from_report_threshold_contains_accuracy(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
@@ -88,7 +88,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIn("0.88", actual)
 
     def test_get_md_from_report_threshold_contains_threshold(self):
-        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=[[10, 2], [1, 12]])
+        report = XgbPeEvaluateReport(auc=0.92, acc=0.88, cm=np.array([[10, 2], [1, 12]]))
         threshold = 0.7
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
@@ -96,7 +96,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIn("0.70", actual)
 
     def test_get_md_from_report_threshold_with_high_scores(self):
-        report = XgbPeEvaluateReport(auc=0.99, acc=0.97, cm=[[100, 1], [2, 97]])
+        report = XgbPeEvaluateReport(auc=0.99, acc=0.97, cm=np.array([[100, 1], [2, 97]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
@@ -105,7 +105,7 @@ class TestXgbPeEvaluatorFormatter(unittest.TestCase):
         self.assertIn("0.97", actual)
 
     def test_get_md_from_report_threshold_with_low_scores(self):
-        report = XgbPeEvaluateReport(auc=0.51, acc=0.52, cm=[[26, 24], [24, 26]])
+        report = XgbPeEvaluateReport(auc=0.51, acc=0.52, cm=np.array([[26, 24], [24, 26]]))
         threshold = 0.5
 
         actual = XgbPeEvaluatorFormatter.get_md_from_report_threshold(report, threshold)
