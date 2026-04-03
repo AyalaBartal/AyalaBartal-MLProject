@@ -96,6 +96,18 @@ try:
 except Exception as e:
     print(f"Warning: LightGBM model not available: {e}")
 
+cbst_detector = None
+cbst_available = False
+try:
+    cbst_detector = MalwareDetector(
+        'models/catboost/catboost_model.joblib',
+        scaler_path='models/catboost/catboost_scaler.joblib',
+        transformer_path=None  # CatBoost doesn't use sklearn transformer
+    )
+    cbst_available = True
+except Exception as e:
+    print(f"Warning: LightGBM model not available: {e}")
+
 # Default to DT, will be overridden by model parameter in routes
 detector = dt_detector
 
@@ -154,6 +166,16 @@ if lgb_available:
     except Exception as e:
         print(f"Warning: LightGBM feature schema not found: {e}")
 
+# Load CatBoost feature names if available
+CBST_FEATURE_NAMES = None
+if cbst_available:
+    try:
+        with open('models/catboost/cbst_feature_schema.json', 'r') as f:
+            cbst_schema = json.load(f)
+            CBST_FEATURE_NAMES = cbst_schema['features']
+    except Exception as e:
+        print(f"Warning: CatBoost feature schema not found: {e}")
+
 # Default to DT features
 FEATURE_NAMES = DT_FEATURE_NAMES
 
@@ -210,7 +232,8 @@ def index():
                          lr_available=lr_available,
                          ml_available=ml_available,
                          xgb_available=xgb_available,
-                         lgb_available=lgb_available)
+                         lgb_available=lgb_available,
+                         cbst_available=cbst_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -234,6 +257,9 @@ def predict():
         elif model_param == 'lgb' and lgb_available:
             selected_detector = lgb_detector
             selected_features = LGB_FEATURE_NAMES
+        elif model_param == 'cbst' and cbst_available:
+            selected_detector = cbst_detector
+            selected_features = CBST_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             selected_features = DT_FEATURE_NAMES
@@ -384,6 +410,9 @@ def upload_file():
             elif model_param == 'lgb' and lgb_available:
                 selected_detector = lgb_detector
                 model_features = LGB_FEATURE_NAMES
+            elif model_param == 'cbst' and cbst_available:
+                selected_detector = cbst_detector
+                model_features = CBST_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES
