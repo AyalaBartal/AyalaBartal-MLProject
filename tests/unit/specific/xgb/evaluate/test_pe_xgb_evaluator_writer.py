@@ -54,7 +54,7 @@ class TestXgbPeEvaluatorWriter(unittest.TestCase):
 
         self.writer.create_plot_of_confusion_matrix(out_png, report)
 
-        self.plot_writer.write_confusion_matrix_plot.assert_called_once_with(out_png, report.cm)
+        self.plot_writer.create_plot.assert_called_once_with(out_png, report.cm)
 
     def test_write_out_json_with_different_threshold(self):
         out_json = "output.json"
