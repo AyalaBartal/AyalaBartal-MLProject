@@ -1,0 +1,25 @@
+{
+  "cv_auc_mean": 0.9998036363846922,
+  "cv_auc_std": 7.705356003993716e-05,
+  "cv_accuracy_mean": 0.9953417832703237,
+  "cv_accuracy_std": 0.0006231505454541654,
+  "test_auc": 0.9997628503119966,
+  "test_accuracy": 0.9951180631662847,
+  "confusion_matrix": [
+    [
+      4197,
+      27
+    ],
+    [
+      22,
+      5791
+    ]
+  ],
+  "architecture": {
+    "n_estimators": 100,
+    "max_depth": 6,
+    "learning_rate": 0.1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  }
+}
