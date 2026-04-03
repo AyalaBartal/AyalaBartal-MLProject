@@ -84,6 +84,18 @@ try:
 except Exception as e:
     print(f"Warning: XGBoost model not available: {e}")
 
+lgb_detector = None
+lgb_available = False
+try:
+    lgb_detector = MalwareDetector(
+        'models/lightgbm/lightgbm_model.joblib',
+        scaler_path='models/lightgbm/lightgbm_scaler.joblib',
+        transformer_path=None  # LightGBM doesn't use sklearn transformer
+    )
+    lgb_available = True
+except Exception as e:
+    print(f"Warning: LightGBM model not available: {e}")
+
 # Default to DT, will be overridden by model parameter in routes
 detector = dt_detector
 
@@ -131,6 +143,16 @@ if xgb_available:
             XGB_FEATURE_NAMES = xgb_schema['feature_order']
     except Exception as e:
         print(f"Warning: XGBoost feature schema not found: {e}")
+
+# Load LightGBM feature names if available
+LGB_FEATURE_NAMES = None
+if lgb_available:
+    try:
+        with open('models/lightgbm/lgb_feature_schema.json', 'r') as f:
+            lgb_schema = json.load(f)
+            LGB_FEATURE_NAMES = lgb_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: LightGBM feature schema not found: {e}")
 
 # Default to DT features
 FEATURE_NAMES = DT_FEATURE_NAMES
@@ -187,7 +209,8 @@ def index():
                          rf_available=rf_available,
                          lr_available=lr_available,
                          ml_available=ml_available,
-                         xgb_available=xgb_available)
+                         xgb_available=xgb_available,
+                         lgb_available=lgb_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -208,6 +231,9 @@ def predict():
         elif model_param == 'xgb' and xgb_available:
             selected_detector = xgb_detector
             selected_features = XGB_FEATURE_NAMES
+        elif model_param == 'lgb' and lgb_available:
+            selected_detector = lgb_detector
+            selected_features = LGB_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             selected_features = DT_FEATURE_NAMES
@@ -276,6 +302,9 @@ def predict_raw():
         elif model_param == 'xgb' and xgb_available:
             selected_detector = xgb_detector
             model_features = XGB_FEATURE_NAMES
+        elif model_param == 'lgb' and lgb_available:
+            selected_detector = lgb_detector
+            model_features = LGB_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             model_features = DT_FEATURE_NAMES
@@ -352,6 +381,9 @@ def upload_file():
             elif model_param == 'xgb' and xgb_available:
                 selected_detector = xgb_detector
                 model_features = XGB_FEATURE_NAMES
+            elif model_param == 'lgb' and lgb_available:
+                selected_detector = lgb_detector
+                model_features = LGB_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES
