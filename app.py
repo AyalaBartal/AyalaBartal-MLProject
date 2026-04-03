@@ -72,6 +72,18 @@ try:
 except Exception as e:
     print(f"Warning: PyTorch MLP model not available: {e}")
 
+xgb_detector = None
+xgb_available = False
+try:
+    xgb_detector = MalwareDetector(
+        'models/xgboost/xgboost_model.joblib',
+        scaler_path='models/xgboost/xgboost_scaler.joblib',
+        transformer_path=None  # XGBoost doesn't use sklearn transformer
+    )
+    xgb_available = True
+except Exception as e:
+    print(f"Warning: XGBoost model not available: {e}")
+
 # Default to DT, will be overridden by model parameter in routes
 detector = dt_detector
 
@@ -109,6 +121,16 @@ if ml_available:
             ML_FEATURE_NAMES = ml_schema['feature_order']
     except Exception as e:
         print(f"Warning: ML feature schema not found: {e}")
+
+# Load XGBoost feature names if available
+XGB_FEATURE_NAMES = None
+if xgb_available:
+    try:
+        with open('models/xgboost/xgb_feature_schema.json', 'r') as f:
+            xgb_schema = json.load(f)
+            XGB_FEATURE_NAMES = xgb_schema['feature_order']
+    except Exception as e:
+        print(f"Warning: XGBoost feature schema not found: {e}")
 
 # Default to DT features
 FEATURE_NAMES = DT_FEATURE_NAMES
@@ -164,7 +186,8 @@ def index():
                          raw_demo_data=RAW_DEMO_DATA,
                          rf_available=rf_available,
                          lr_available=lr_available,
-                         ml_available=ml_available)
+                         ml_available=ml_available,
+                         xgb_available=xgb_available)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -182,6 +205,9 @@ def predict():
         elif model_param == 'ml' and ml_available:
             selected_detector = ml_detector
             selected_features = ML_FEATURE_NAMES
+        elif model_param == 'xgb' and xgb_available:
+            selected_detector = xgb_detector
+            selected_features = XGB_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             selected_features = DT_FEATURE_NAMES
@@ -247,6 +273,9 @@ def predict_raw():
         elif model_param == 'ml' and ml_available:
             selected_detector = ml_detector
             model_features = ML_FEATURE_NAMES
+        elif model_param == 'xgb' and xgb_available:
+            selected_detector = xgb_detector
+            model_features = XGB_FEATURE_NAMES
         else:
             selected_detector = dt_detector
             model_features = DT_FEATURE_NAMES
@@ -320,6 +349,9 @@ def upload_file():
             elif model_param == 'ml' and ml_available:
                 selected_detector = ml_detector
                 model_features = ML_FEATURE_NAMES
+            elif model_param == 'xgb' and xgb_available:
+                selected_detector = xgb_detector
+                model_features = XGB_FEATURE_NAMES
             else:
                 selected_detector = dt_detector
                 model_features = DT_FEATURE_NAMES
