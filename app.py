@@ -441,6 +441,13 @@ def upload_file():
                     df_features = df
                 
                 try:
+                    # Check if required columns exist
+                    required_cols = ['FirstSeenDate', 'TimeDateStamp', 'Entropy', 'Size']
+                    missing_cols = [col for col in required_cols if col not in df_features.columns]
+                    if missing_cols:
+                        flash(f'Error: Missing required columns: {", ".join(missing_cols)}. Expected raw PE file features.', 'error')
+                        return redirect(url_for('index'))
+                    
                     # Use the mapper to preprocess (same as training)
                     mapper = DtPePreprocessorProvider.get_mapper()
                     X_transformed = mapper.map(df_features)
@@ -576,7 +583,18 @@ def rf_visualization():
     """Serve pre-generated random forest feature importance visualization"""
     from flask import send_file
     try:
-        return send_file('models/random_forest/feature_importance.png', mimetype='image/png')
+        import os
+        viz_path = 'models/random_forest/feature_importance.png'
+        if os.path.exists(viz_path):
+            return send_file(viz_path, mimetype='image/png')
+        else:
+            # Return placeholder if file not found
+            return '''<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+                <rect width="400" height="300" fill="#f0f0f0"/>
+                <text x="200" y="150" font-size="16" text-anchor="middle" fill="#666">
+                Visualization not available
+                </text>
+            </svg>''', 200, {'Content-Type': 'image/svg+xml'}
     except Exception as e:
         print(f"Error serving RF visualization: {e}")
         return f"Error serving visualization: {str(e)}", 500
