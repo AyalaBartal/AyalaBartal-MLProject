@@ -173,3 +173,6 @@ docs/
 
 # Allow models directory for deployment
 !models/
+!models/**/*.pt
+!models/**/*.joblib
+!models/**/*.json
