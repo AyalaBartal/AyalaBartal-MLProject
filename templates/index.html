@@ -12,7 +12,7 @@
             padding: 20px;
         }
         .container { 
-            max-width: 900px; 
+            max-width: 1200px; 
             margin: 0 auto; 
             background: white;
             border-radius: 15px;
@@ -141,6 +141,24 @@
             border-bottom: 2px solid #e0e0e0;
             margin-bottom: 30px;
             gap: 5px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+        }
+        .tabs::-webkit-scrollbar {
+            height: 6px;
+        }
+        .tabs::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .tabs::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .tabs::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         .tab {
             padding: 15px 30px;
@@ -152,6 +170,8 @@
             font-weight: 600;
             color: #7f8c8d;
             transition: all 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .tab:hover {
             background: #ecf0f1;
@@ -199,6 +219,9 @@
                 {% endif %}
                 {% if xgb_available %}
                 <button class="tab" onclick="switchTab('xgb')">⚡ XGBoost</button>
+                {% endif %}
+                {% if lgb_available %}
+                <button class="tab" onclick="switchTab('lgb')">🟡 LightGBM</button>
                 {% endif %}
                 <button class="tab" onclick="switchTab('future')">➕ More Models (Coming Soon)</button>
             </div>
@@ -528,6 +551,74 @@
                             <br>
                             <button type="submit" class="btn btn-primary">
                                 <span class="icon">⚡</span>Process File
+                            </button>
+                            <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                                📝 Include 'Label' column (0=Goodware, 1=Malware) for evaluation metrics.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if lgb_available %}
+            <div id="lgb-tab" class="tab-content">
+                <div class="section">
+                    <h2>🟡 Model Information</h2>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">LightGBM Gradient Boosting Ensemble (Fast & Efficient)</p>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Architecture:</strong><br>
+                        ✓ Input: 423 features<br>
+                        ✓ n_estimators: 100<br>
+                        ✓ max_depth: 6<br>
+                        ✓ num_leaves: 31<br>
+                        ✓ learning_rate: 0.1<br>
+                        ✓ Output: Binary classification<br>
+                        <strong style="margin-top: 10px; display: block;">Performance (5-fold CV):</strong><br>
+                        ✓ AUC: ~0.95-0.99<br>
+                        ✓ Accuracy: ~95-99%<br>
+                        ✓ Samples: 40,144 training + 10,037 test<br>
+                        ✓ Features: 423
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📄 Single Sample Analysis</h2>
+                    <p style="margin-bottom: 20px; color: #7f8c8d;">Enter raw PE file features ({{ raw_fields|length }} fields) - pre-filled with demo data:</p>
+                    
+                    <form method="POST" action="/predict_raw">
+                        <input type="hidden" name="model" value="lgb">
+                        <div class="feature-grid">
+                            {% for field in raw_fields %}
+                                <div>
+                                    <div class="feature-label">{{ field }}</div>
+                                    <input type="text" name="{{ field }}" value="{{ raw_demo_data.get(field, '') }}" class="feature-input">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="predict-btn">🔍 Predict (LightGBM)</button>
+                    </form>
+                </div>
+                
+                <div class="section">
+                    <h2>📊 Batch Evaluation</h2>
+                    <p style="margin-bottom: 15px; color: #7f8c8d;">Supports:</p>
+                    <ul style="margin-bottom: 15px; color: #7f8c8d; font-size: 0.95em;">
+                        <li><strong>Raw PE data:</strong> {{ raw_fields|length }} fields (Size, Entropy, ImportedDlls, etc.)</li>
+                        <li><strong>Preprocessed data:</strong> 423 features</li>
+                    </ul>
+                    <p style="margin-bottom: 15px; color: #27ae60; font-size: 0.9em;">
+                        ✓ Raw files will be automatically preprocessed
+                    </p>
+                    <div class="upload-area">
+                        <form method="POST" action="/upload" enctype="multipart/form-data">
+                            <input type="hidden" name="model" value="lgb">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📤</div>
+                            <h3 style="margin-bottom: 15px; color: #2c3e50;">Upload CSV File</h3>
+                            <input type="file" name="file" accept=".csv" required class="file-input">
+                            <br>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon">🟡</span>Process File
                             </button>
                             <p style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
                                 📝 Include 'Label' column (0=Goodware, 1=Malware) for evaluation metrics.
