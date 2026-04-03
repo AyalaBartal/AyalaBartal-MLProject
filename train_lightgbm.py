@@ -20,23 +20,20 @@ from src.common.preprocessor import DtPePreprocessorProvider
 def load_and_preprocess_data():
     """Load and preprocess the Brazilian malware dataset"""
     print("Loading dataset...")
-    df = pd.read_csv('data/brazilian-malware.csv')
+    df = pd.read_csv('uploads/brazilian-malware.csv')
     
-    # Separate features and target
-    X = df.drop(columns=['target'])
-    y = df['target']
+    print(f"Dataset shape: {df.shape}")
+    print(f"Target distribution:\n{df['Label'].value_counts()}")
     
-    print(f"Dataset shape: {X.shape}")
-    print(f"Target distribution:\n{y.value_counts()}")
-    
-    # Apply preprocessing
+    # Preprocess using mapper
     print("Applying preprocessing...")
-    preprocessor = DtPePreprocessorProvider.get_transformer()
-    X_transformed = preprocessor.fit_transform(X)
+    mapper = DtPePreprocessorProvider.get_mapper()
+    X_transformed = mapper.map(df.drop('Label', axis=1))
+    y = df['Label']
     
     print(f"Transformed shape: {X_transformed.shape}")
     
-    return X_transformed, y, preprocessor
+    return X_transformed, y, mapper
 
 
 def train_with_cv(X, y, n_splits=5):
@@ -65,7 +62,7 @@ def train_with_cv(X, y, n_splits=5):
         print("-" * 40)
         
         # Split data
-        X_train, X_val = X[train_idx], X[val_idx]
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         
         # Scale features
@@ -208,9 +205,9 @@ def main():
     test_indices = indices[:n_test]
     train_indices = indices[n_test:]
     
-    X_train_val = X[train_indices]
+    X_train_val = X.iloc[train_indices]
     y_train_val = y.iloc[train_indices]
-    X_test = X[test_indices]
+    X_test = X.iloc[test_indices]
     y_test = y.iloc[test_indices]
     
     print(f"\nTrain+Val: {len(X_train_val)} samples")
@@ -227,7 +224,7 @@ def main():
     # Get feature schema
     feature_schema = {
         'feature_count': X.shape[1],
-        'feature_order': list(preprocessor.get_feature_names_out()),
+        'feature_order': list(X.columns),
         'model_type': 'lightgbm'
     }
     
