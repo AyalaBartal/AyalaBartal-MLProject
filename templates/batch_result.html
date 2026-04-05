@@ -81,6 +81,7 @@
         }
         .malware-row { background: linear-gradient(135deg, #ffebee, #fce4ec); }
         .goodware-row { background: linear-gradient(135deg, #e8f5e8, #f1f8e9); }
+        .wrong-row { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-left: 3px solid #e74c3c; }
         .results-table tbody tr:hover {
             background-color: rgba(52, 152, 219, 0.1);
             transition: background-color 0.2s;
@@ -220,13 +221,14 @@
                     <thead>
                         <tr>
                             <th>Sample #</th>
-                            <th>Classification</th>
+                            <th>Predicted</th>
+                            {% if has_labels %}<th>Actual</th><th>Correct?</th>{% endif %}
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pred in predictions %}
-                        <tr class="{% if pred.prediction == 1 %}malware-row{% else %}goodware-row{% endif %}">
+                        <tr class="{% if has_labels and not pred.correct %}wrong-row{% elif pred.prediction == 1 %}malware-row{% else %}goodware-row{% endif %}">
                             <td><strong>{{ loop.index }}</strong></td>
                             <td>
                                 {% if pred.prediction == 1 %}
@@ -235,6 +237,22 @@
                                     ✅ {{ pred.label }}
                                 {% endif %}
                             </td>
+                            {% if has_labels %}
+                            <td>
+                                {% if pred.actual == 1 %}
+                                    🦠 {{ pred.actual_label }}
+                                {% else %}
+                                    ✅ {{ pred.actual_label }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if pred.correct %}
+                                    <span style="color: #27ae60; font-weight: 600;">✅ Correct</span>
+                                {% else %}
+                                    <span style="color: #e74c3c; font-weight: 600;">❌ Wrong</span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                             <td>
                                 {% if pred.prediction == 1 %}
                                     <span style="color: #e74c3c; font-weight: 600;">⚠️ MALWARE DETECTED</span>

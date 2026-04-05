@@ -513,10 +513,17 @@ def upload_file():
             
             # Calculate metrics if labels exist
             metrics = None
+            actual_labels = list(y) if has_labels else None
             if has_labels:
                 y_pred = [p['prediction'] for p in predictions]
                 y_prob = [p['probability']['malware'] for p in predictions]
                 
+                # Attach actual label and correctness to each prediction row
+                for i, pred in enumerate(predictions):
+                    pred['actual'] = int(actual_labels[i])
+                    pred['actual_label'] = 'Malware' if actual_labels[i] == 1 else 'Goodware'
+                    pred['correct'] = pred['prediction'] == int(actual_labels[i])
+
                 # Check if we have both classes
                 unique_labels = set(y) | set(y_pred)
                 
