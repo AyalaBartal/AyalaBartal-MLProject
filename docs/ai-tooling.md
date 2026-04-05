@@ -1,52 +1,50 @@
 # AI Tooling Usage
 
 ## Tools Used
-This project leveraged AI-powered development tools to accelerate development:
 
-### Code Generation & Development
-- **Tool**: Amazon Q Developer (Claude-based AI assistant)
-- **Usage**: 
-  - Generated Flask web application structure and routes
-  - Created comprehensive test suite (unit, integration, smoke tests)
-  - Built responsive HTML/CSS templates with modern design
-  - Developed CI/CD pipeline configuration
-  - Created model wrapper and preprocessing utilities
+This project used three AI tools throughout development:
 
-### Code Review and Optimization
-- **Tool**: Amazon Q Developer
-- **Usage**: 
-  - Identified and fixed import conflicts and dependency issues
-  - Optimized responsive grid layouts and CSS styling
-  - Debugged deployment compatibility issues (Python version, pandas conflicts)
-  - Improved error handling and validation
+### 1. Kiro (AWS AI IDE)
+- **Usage**:
+  - Built the initial project structure and Flask web application
+  - Created the preprocessing pipeline and feature transformers
+  - Generated unit and integration tests
+  - Developed the Decision Tree and Random Forest training scripts
+  - Set up the CI/CD GitHub Actions workflow
 
-### Documentation and Project Structure
-- **Tool**: Amazon Q Developer
-- **Usage**: 
-  - Generated comprehensive README and documentation files
-  - Created deployment guides and setup instructions
-  - Structured project organization and file hierarchy
+### 2. ChatGPT (OpenAI)
+- **Usage**:
+  - Helped debug preprocessing issues and feature alignment problems
+  - Explained machine learning concepts and helped choose hyperparameters
+  - Assisted with writing documentation and design explanations
+  - Helped troubleshoot Render deployment issues
+
+### 3. GitHub Copilot (Claude-based)
+- **Usage**:
+  - Fixed submission gaps — updated `evaluation-and-design.md` with real metrics from all 7 models
+  - Computed missing CV metrics (Decision Tree 10-fold, Random Forest 10-fold with std, CatBoost test set)
+  - Implemented functional `train.py` and `eval.py` scripts
+  - Fixed CI/CD pipeline deploy step with real Render deploy hook
+  - Fixed `.gitignore` so required submission docs are tracked in git
+  - Added "Actual" and "Correct/Wrong" columns to batch results table
+  - Fixed integration test to read feature count dynamically from schema
 
 ## What Worked Well
-- **Rapid prototyping**: Generated complete Flask application in minutes
-- **Comprehensive testing**: Automatically created full test coverage
-- **Modern UI design**: Generated beautiful, responsive interface without manual CSS work
-- **CI/CD setup**: Complete GitHub Actions workflow with proper testing pipeline
-- **Problem solving**: Quickly identified and resolved deployment issues
-- **Documentation**: Generated professional documentation and guides
+- **Rapid development**: Kiro generated large amounts of boilerplate code quickly — Flask routes, test suites, HTML templates
+- **Debugging**: ChatGPT was useful for explaining errors and suggesting fixes
+- **Gap filling**: GitHub Copilot was effective at identifying what was missing and making precise surgical fixes
+- **Documentation**: All three tools helped write clear, professional documentation
 
-## Challenges and Manual Interventions
-- **Dependency conflicts**: Required manual adjustment of Python versions and package compatibility
-- **Platform-specific issues**: Needed to adapt for Render deployment requirements
-- **Feature naming**: Updated generic F1-F27 labels to realistic malware analysis features
-- **Grid layout**: Fine-tuned responsive design for optimal user experience
+## Challenges
+- **Feature schema mismatches**: Different training scripts saved schemas with different key names (`feature_order` vs `features`) — required manual debugging
+- **Dependency conflicts**: Python version and package compatibility issues on Render required manual adjustment
+- **Duplicate columns**: The preprocessing pipeline produced duplicate column names that had to be deduplicated before training
+- **Model accuracy too high**: Random Forest achieved near-perfect accuracy (AUC=1.0) making it hard to demonstrate errors in the demo — resolved by using Logistic Regression for comparison
 
 ## Effectiveness Assessment
-**Highly Effective (90%+ time savings)**:
-- Boilerplate code generation
-- Test suite creation
-- Documentation writing
-- UI/UX design and styling
+- **Kiro**: ~80% of code generated — highly effective for structure and boilerplate
+- **ChatGPT**: Useful for explanations and debugging guidance
+- **GitHub Copilot**: Highly effective for precise fixes, metric computation, and submission preparation
 
 **Moderately Effective (50-70% time savings)**:
 - Debugging deployment issues
