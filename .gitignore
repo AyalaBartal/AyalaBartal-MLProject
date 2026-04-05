@@ -169,7 +169,6 @@ uploads/
 temp/
 logs/
 data/
-docs/
 
 # Allow models directory for deployment
 !models/

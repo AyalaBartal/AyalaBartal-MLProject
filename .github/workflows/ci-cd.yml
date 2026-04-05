@@ -9,42 +9,45 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Create dummy model
       run: |
         python create_dummy_model.py
-    
-    - name: Run tests
+
+    - name: Run unit tests
       run: |
-        cd $GITHUB_WORKSPACE
         PYTHONPATH=$GITHUB_WORKSPACE pytest tests/unit/specific -v --cov=src --cov-report=term-missing
-    
-    - name: Test health endpoint
+
+    - name: Run integration tests
       run: |
-        python -m pytest tests/test_integration.py::test_health_endpoint -v
+        PYTHONPATH=$GITHUB_WORKSPACE pytest tests/test_integration.py -v
+
+    - name: Run smoke test against live deployment
+      run: |
+        PYTHONPATH=$GITHUB_WORKSPACE DEPLOYMENT_URL=${{ vars.DEPLOYMENT_URL || 'http://localhost:5000' }} pytest tests/test_smoke.py -v
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Deploy to production
+    - name: Trigger Render deployment
       run: |
-        echo "Deployment would happen here"
-        # Actual deployment commands will be added when we set up hosting
+        curl -s -o /dev/null -w "%{http_code}" \
+          -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" | grep -qE "^2" \
+          && echo "Deployment triggered successfully" \
+          || echo "Warning: deploy hook returned non-2xx (check RENDER_DEPLOY_HOOK_URL secret)"

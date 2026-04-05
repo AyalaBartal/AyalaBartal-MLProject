@@ -34,7 +34,12 @@ def test_home_page(client):
 
 def test_api_predict_endpoint(client):
     """Test API prediction endpoint"""
-    test_features = [0.0] * 473  # Updated to match model's expected features
+    import json as _json, os
+    schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                               'models', 'decision_tree', 'dt_feature_schema.json')
+    with open(schema_path) as f:
+        n_features = len(_json.load(f)['feature_order'])
+    test_features = [0.0] * n_features
     response = client.post('/api/predict',
                           data=json.dumps({'features': test_features}),
                           content_type='application/json')
